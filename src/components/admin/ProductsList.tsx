@@ -2,11 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type { ProductDTO } from "@/types/catalog";
 
-export function ProductsList({ products }: { products: ProductDTO[] }) {
+export function ProductsList({
+  products,
+  onEdit,
+}: {
+  products: ProductDTO[];
+  onEdit: (product: ProductDTO) => void;
+}) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -43,15 +49,24 @@ export function ProductsList({ products }: { products: ProductDTO[] }) {
               <td className="px-5 py-3 text-english-800">{formatCurrency(product.price)}</td>
               <td className="px-5 py-3 text-ink/70">{product.stock}</td>
               <td className="px-5 py-3 text-ink/70">{product.sizes.join(", ") || "—"}</td>
-              <td className="px-5 py-3 text-right">
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  disabled={deletingId === product.id}
-                  className="text-ink/40 hover:text-red-500"
-                  aria-label="Desactivar producto"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <td className="px-5 py-3">
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    onClick={() => onEdit(product)}
+                    className="text-ink/40 hover:text-english-700"
+                    aria-label="Editar producto"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    disabled={deletingId === product.id}
+                    className="text-ink/40 hover:text-red-500"
+                    aria-label="Desactivar producto"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

@@ -8,8 +8,14 @@ datasource db {
 }
 
 enum Role {
-  USER
+  CLIENT
   ADMIN
+}
+
+enum Locality {
+  VILLA_MARIA
+  VILLA_NUEVA
+  OTRA
 }
 
 enum Category {
@@ -43,7 +49,11 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  role          Role      @default(USER)
+  role          Role      @default(CLIENT)
+
+  address  String?
+  locality Locality?
+  phone    String?
 
   accounts Account[]
   sessions Session[]
@@ -121,6 +131,8 @@ model Order {
   guestEmail   String?
   guestDni     String?
   guestAddress String?
+
+  locality Locality?
 
   status        PaymentStatus @default(PENDING)
   paymentMethod PaymentMethod?

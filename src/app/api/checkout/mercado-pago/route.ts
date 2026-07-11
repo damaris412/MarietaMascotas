@@ -18,7 +18,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { items, guest } = parsed.data;
+    const { items, guest, locality } = parsed.data;
+
+    if (locality === "OTRA") {
+      return NextResponse.json(
+        { error: "Por ahora solo hacemos envíos a Villa María y Villa Nueva." },
+        { status: 400 }
+      );
+    }
 
     if (!session?.user && !guest) {
       return NextResponse.json(
@@ -65,6 +72,7 @@ export async function POST(req: NextRequest) {
         guestEmail: guest?.email,
         guestDni: guest?.dni,
         guestAddress: guest?.address,
+        locality,
         shippingCost,
         total,
         items: {
