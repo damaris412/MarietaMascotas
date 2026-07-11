@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LogOut, Package, User as UserIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, User as UserIcon } from "lucide-react";
 
 export function AccountMenu() {
   const { data: session, status } = useSession();
@@ -49,6 +49,15 @@ export function AccountMenu() {
       {open && (
         <div className="absolute right-0 top-12 w-56 rounded-2xl border border-sage-200/70 bg-white p-2 shadow-xl">
           <p className="truncate px-3 py-2 text-xs text-ink/50">{session.user?.email}</p>
+          {session.user?.role === "ADMIN" && (
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-english-700 hover:bg-sage-100"
+            >
+              <LayoutDashboard className="h-4 w-4" /> Panel admin
+            </Link>
+          )}
           <Link
             href="/mis-pedidos"
             onClick={() => setOpen(false)}
