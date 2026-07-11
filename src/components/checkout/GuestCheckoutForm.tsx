@@ -5,11 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Loader2, LogOut } from "lucide-react";
-import { guestDetailsSchema, type GuestDetails } from "@/lib/validation";
+import { guestDetailsSchema, type GuestDetails, type LocalityValue } from "@/lib/validation";
 import { useCart } from "@/components/providers/CartProvider";
 import { cn } from "@/lib/utils";
 
-export function GuestCheckoutForm() {
+export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null }) {
   const { items } = useCart();
   const { data: session, status } = useSession();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -27,10 +27,15 @@ export function GuestCheckoutForm() {
     if (session?.user) {
       setValue("name", session.user.name ?? "");
       setValue("email", session.user.email ?? "");
+      if (session.user.address) setValue("address", session.user.address);
     }
   }, [session, setValue]);
 
   async function onSubmit(data: GuestDetails) {
+    if (!locality) {
+      setServerError("Elegí tu localidad antes de continuar.");
+      return;
+    }
     setServerError(null);
     setLoading(true);
     try {
@@ -44,6 +49,7 @@ export function GuestCheckoutForm() {
             size: item.size,
           })),
           guest: data,
+          locality,
         }),
       });
       const json = await res.json();
@@ -143,6 +149,7 @@ export function GuestCheckoutForm() {
           <textarea
             {...register("address")}
             rows={3}
+            data-lenis-prevent
             className={inputClass(!!errors.address)}
             placeholder="Calle, número, barrio, ciudad y referencias"
           />
@@ -155,7 +162,7 @@ export function GuestCheckoutForm() {
 
         <button
           type="submit"
-          disabled={loading || items.length === 0}
+          disabled={loading || items.length === 0 || !locality}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-english-700 py-3.5 text-sm font-semibold text-linen transition-colors hover:bg-english-800 disabled:opacity-50"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}

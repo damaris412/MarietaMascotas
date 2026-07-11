@@ -16,6 +16,7 @@ export async function getAdminOrders(limit = 200) {
     customerEmail: order.user?.email ?? order.guestEmail ?? "—",
     dni: order.guestDni ?? "—",
     address: order.guestAddress ?? "—",
+    locality: order.locality,
     isGuest: !order.userId,
     status: order.status,
     paymentMethod: order.paymentMethod,
@@ -26,3 +27,26 @@ export async function getAdminOrders(limit = 200) {
 }
 
 export type AdminOrderRow = Awaited<ReturnType<typeof getAdminOrders>>[number];
+
+export async function getUserOrders(userId: string) {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    include: { items: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return orders.map((order) => ({
+    id: order.id,
+    status: order.status,
+    total: Number(order.total),
+    createdAt: order.createdAt,
+    items: order.items.map((item) => ({
+      title: item.title,
+      quantity: item.quantity,
+      size: item.size,
+      price: Number(item.price),
+    })),
+  }));
+}
+
+export type UserOrderRow = Awaited<ReturnType<typeof getUserOrders>>[number];

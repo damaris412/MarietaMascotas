@@ -72,6 +72,8 @@ ni puntitos, para un look minimal. Colores definidos en `src/app/globals.css`:
    - `NEXT_PUBLIC_WHATSAPP_NUMBER`: número de WhatsApp del negocio en formato internacional sin
      "+" ni espacios (ej. `5493534123456`), usado en el checkout para coordinar por WhatsApp con
      clientes fuera de la zona de envío.
+   - `ADMIN_EMAIL`: el email que, la primera vez que inicia sesión con Google, queda como `ADMIN`
+     automáticamente. Cualquier otro email queda como `CLIENT`.
 
 2. Levanta solo la base de datos con Docker:
 
@@ -105,19 +107,20 @@ Esto construye la imagen de la app (`docker/Dockerfile`), levanta Postgres, corr
 (`prisma migrate deploy`) automáticamente en el servicio `migrate`, y arranca la app en
 `http://localhost:3000`. Sigue usando el único archivo `.env` para toda la configuración.
 
-## Convertir un usuario en administrador
+## Cuentas, perfil y rol de administrador
 
-No existe una pantalla pública de registro de administradores (por seguridad). Para dar acceso
-al panel `/admin/dashboard`:
-
-1. Inicia sesión una vez con Google desde `/acceso-admin` (ruta oculta, sin enlaces desde el menú).
-2. En la base de datos, actualiza el rol de ese usuario:
-
-   ```sql
-   UPDATE "User" SET role = 'ADMIN' WHERE email = 'tu-correo@dominio.com';
-   ```
-
-3. Vuelve a `/acceso-admin` (o refresca la sesión) para acceder al dashboard.
+- **Compra como invitado o con cuenta (híbrido)**: el checkout no exige iniciar sesión — se puede
+  seguir comprando como invitado (nombre, correo, DNI, dirección) igual que antes. Iniciar sesión
+  con Google es opcional y da beneficios: perfil guardado (no hay que reescribir los datos en la
+  próxima compra) e historial en `/mis-pedidos`.
+- **Rol de administrador automático**: no existe una pantalla pública de registro de
+  administradores. La primera vez que el email configurado en `ADMIN_EMAIL` inicia sesión con
+  Google, `events.createUser` en `src/server/auth/auth.ts` lo marca como `ADMIN` automáticamente
+  (no hace falta tocar la base de datos a mano). Cualquier otro email queda como `CLIENT`. Para
+  entrar al panel, usá `/acceso-admin` (ruta oculta, sin enlaces desde el menú).
+- **Perfil obligatorio para cuentas registradas**: si un usuario inicia sesión y todavía no
+  cargó dirección, localidad y teléfono, se lo redirige a `/perfil/completar` antes de poder
+  pagar (ver el `useEffect` en `src/app/checkout/page.tsx`). Los invitados no pasan por esto.
 
 El middleware (`src/proxy.ts`) protege `/admin/*` y `/api/admin/*`, redirigiendo a
 `/acceso-admin` a cualquier usuario que no tenga rol `ADMIN`.
@@ -159,6 +162,10 @@ directamente por chat.
 
 ## Notas de implementación
 
+- Scroll suave (Lenis, `src/components/providers/SmoothScrollProvider.tsx`) requiere el CSS
+  oficial de integración en `globals.css` (`html.lenis { height: auto }`, etc.) — sin eso, el
+  `h-full` de Tailwind en `<html>` hace que Lenis calcule mal el rango de scroll y la página
+  parece "trabada". Si el scroll deja de funcionar en algún momento, revisar primero ese CSS.
 - Moneda: pesos argentinos (ARS) en toda la app (`formatCurrency` en `src/lib/utils.ts` y
   `currency_id` en la preferencia de Mercado Pago).
 - Las camas ya tienen fotografía real de catálogo (`public/images/productos/`); la ropa todavía

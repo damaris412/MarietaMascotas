@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const localitySchema = z.enum(["VILLA_MARIA", "VILLA_NUEVA", "OTRA"]);
+export type LocalityValue = z.infer<typeof localitySchema>;
+
 export const checkoutItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().min(1).max(20),
@@ -20,10 +23,23 @@ export const guestDetailsSchema = z.object({
 export const checkoutRequestSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, "El carrito está vacío"),
   guest: guestDetailsSchema.optional(),
+  locality: localitySchema,
 });
 
 export type GuestDetails = z.infer<typeof guestDetailsSchema>;
 export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
+
+export const profileSchema = z.object({
+  address: z.string().min(10, "Ingresa la dirección completa"),
+  locality: localitySchema,
+  phone: z
+    .string()
+    .min(6, "Ingresa un teléfono válido")
+    .max(20, "El teléfono no es válido")
+    .regex(/^[0-9+\s-]+$/, "El teléfono solo puede tener números, espacios, + y -"),
+});
+
+export type ProfileInput = z.infer<typeof profileSchema>;
 
 export const productSchema = z.object({
   title: z.string().min(3, "El título es muy corto"),

@@ -63,6 +63,26 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Requerido por Lenis (SmoothScrollProvider): sin esto, el "h-full" de
+   Tailwind en <html> fija su altura al viewport y Lenis calcula mal el
+   rango de scroll, dejando la página como si no pudiera hacer scroll. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
 * {
   scrollbar-color: var(--color-sage-400) var(--color-linen);
 }

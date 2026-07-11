@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { MapPin, MessageCircle } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { formatCurrency, cn } from "@/lib/utils";
+import type { LocalityValue } from "@/lib/validation";
 
-type Locality = "VILLA_MARIA" | "VILLA_NUEVA" | "OTRA" | null;
-
-const OPTIONS: { value: Exclude<Locality, null>; label: string }[] = [
+const OPTIONS: { value: LocalityValue; label: string }[] = [
   { value: "VILLA_MARIA", label: "Villa María" },
   { value: "VILLA_NUEVA", label: "Villa Nueva" },
   { value: "OTRA", label: "Otra localidad" },
@@ -33,8 +31,15 @@ function buildWhatsAppMessage(
   ].join("\n");
 }
 
-export function DeliveryAreaGate({ children }: { children: React.ReactNode }) {
-  const [locality, setLocality] = useState<Locality>(null);
+export function DeliveryAreaGate({
+  locality,
+  onLocalityChange,
+  children,
+}: {
+  locality: LocalityValue | null;
+  onLocalityChange: (locality: LocalityValue) => void;
+  children: React.ReactNode;
+}) {
   const { items, subtotal } = useCart();
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
@@ -59,7 +64,7 @@ export function DeliveryAreaGate({ children }: { children: React.ReactNode }) {
           {OPTIONS.map((option) => (
             <button
               key={option.value}
-              onClick={() => setLocality(option.value)}
+              onClick={() => onLocalityChange(option.value)}
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
                 locality === option.value
