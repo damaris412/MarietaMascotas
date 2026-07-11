@@ -43,3 +43,7 @@ next-env.d.ts
 
 # editor
 .vscode/
+
+# carpeta de trabajo con fotos originales sin procesar — las versiones
+# ya recortadas/renombradas que usa la app viven en public/images/productos
+/fotos/
