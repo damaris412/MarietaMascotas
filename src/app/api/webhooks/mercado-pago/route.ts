@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
 import { mpPayment } from "@/server/payments/mercadopago";
@@ -23,22 +24,69 @@ function mapStatus(mpStatus: string) {
   return "PENDING" as const;
 }
 
+/**
+ * Verifica la firma HMAC-SHA256 que Mercado Pago envía en el header
+ * "x-signature" (ts + v1), según el algoritmo oficial:
+ * https://www.mercadopago.com.ar/developers/es/docs/checkout-api/webhooks#editor_5
+ * manifest = "id:{data.id};request-id:{x-request-id};ts:{ts};"
+ */
+function isValidSignature(req: NextRequest, dataId: string): boolean {
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+  const signatureHeader = req.headers.get("x-signature");
+  const requestId = req.headers.get("x-request-id");
+
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") return false;
+    console.warn(
+      "[webhooks/mercado-pago] MERCADOPAGO_WEBHOOK_SECRET no configurado — se omite la verificación de firma (solo permitido fuera de producción)."
+    );
+    return true;
+  }
+
+  if (!signatureHeader || !requestId) return false;
+
+  const parts = Object.fromEntries(
+    signatureHeader.split(",").map((part) => {
+      const [key, value] = part.split("=");
+      return [key?.trim(), value?.trim()];
+    })
+  );
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
+
+  const expectedBuffer = Buffer.from(expected, "hex");
+  const receivedBuffer = Buffer.from(v1, "hex");
+  if (expectedBuffer.length !== receivedBuffer.length) return false;
+
+  return timingSafeEqual(expectedBuffer, receivedBuffer);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const type = url.searchParams.get("type") ?? url.searchParams.get("topic");
-    let paymentId = url.searchParams.get("data.id") ?? url.searchParams.get("id");
+    let dataId = url.searchParams.get("data.id") ?? url.searchParams.get("id");
 
-    if (!paymentId) {
-      const body = await req.json().catch(() => null);
-      paymentId = body?.data?.id ?? null;
-    }
+    const body = await req.json().catch(() => null);
+    dataId = dataId ?? body?.data?.id ?? null;
 
-    if (type !== "payment" || !paymentId) {
+    if (type !== "payment" || !dataId) {
       return NextResponse.json({ received: true });
     }
 
-    const payment = await mpPayment.get({ id: paymentId });
+    if (!isValidSignature(req, dataId)) {
+      console.warn("[webhooks/mercado-pago] Firma inválida, notificación rechazada.");
+      return NextResponse.json({ error: "Firma inválida" }, { status: 401 });
+    }
+
+    // Nunca confiamos en el estado que venga en la notificación: siempre se
+    // vuelve a consultar el pago a la API de Mercado Pago con nuestro access
+    // token para confirmar el estado real antes de tocar la base de datos.
+    const payment = await mpPayment.get({ id: dataId });
     const orderId = payment.external_reference;
     if (!orderId) return NextResponse.json({ received: true });
 
@@ -84,8 +132,4 @@ export async function POST(req: NextRequest) {
     console.error("[webhooks/mercado-pago]", error);
     return NextResponse.json({ received: true }, { status: 200 });
   }
-}
-
-export async function GET(req: NextRequest) {
-  return POST(req);
 }

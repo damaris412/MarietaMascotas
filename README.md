@@ -64,8 +64,14 @@ ni puntitos, para un look minimal. Colores definidos en `src/app/globals.css`:
      redirección autorizada).
    - `MERCADOPAGO_ACCESS_TOKEN`: access token de tu cuenta de Mercado Pago (credenciales de prueba
      o de producción, panel de desarrolladores).
+   - `MERCADOPAGO_WEBHOOK_SECRET`: firma secreta del webhook (panel de Mercado Pago → tu
+     integración → Webhooks → "Firma secreta"). Sin esto, en producción se rechazan todas las
+     notificaciones entrantes.
    - `NEXT_PUBLIC_SITE_URL`: URL pública del sitio (usa una URL de túnel como ngrok en desarrollo
      para que el webhook de Mercado Pago pueda alcanzar tu máquina local).
+   - `NEXT_PUBLIC_WHATSAPP_NUMBER`: número de WhatsApp del negocio en formato internacional sin
+     "+" ni espacios (ej. `5493534123456`), usado en el checkout para coordinar por WhatsApp con
+     clientes fuera de la zona de envío.
 
 2. Levanta solo la base de datos con Docker:
 
@@ -116,17 +122,47 @@ al panel `/admin/dashboard`:
 El middleware (`src/proxy.ts`) protege `/admin/*` y `/api/admin/*`, redirigiendo a
 `/acceso-admin` a cualquier usuario que no tenga rol `ADMIN`.
 
+## Medios de pago (Mercado Pago Checkout Pro)
+
+La preferencia de pago (`src/server/payments/mercadopago.ts`) no excluye ningún medio de pago,
+por lo que Checkout Pro muestra todo lo habilitado para la cuenta en Argentina: tarjeta de
+crédito, tarjeta de débito, transferencia bancaria, dinero en cuenta/QR de la billetera, y
+efectivo (Rapipago y Pago Fácil). El cliente es redirigido a la página de Mercado Pago
+(`init_point`) para elegir el medio y completar el pago ahí — el botón de pago en el checkout
+(`GuestCheckoutForm`) simplemente redirige a esa URL una vez que el backend crea la preferencia.
+
+Para el pago en efectivo, Mercado Pago genera automáticamente el cupón con código de barras para
+pagar en el local (Rapipago/Pago Fácil); no hace falta generar ningún comprobante desde esta app.
+
 ## Webhook de Mercado Pago
 
 Configura la notification URL de tu integración a `https://tu-dominio/api/webhooks/mercado-pago`.
 En desarrollo local, usa una herramienta de túnel (ngrok, cloudflared) y actualiza
 `NEXT_PUBLIC_SITE_URL` en consecuencia para que `back_urls` y `notification_url` sean alcanzables.
 
+El endpoint valida la firma HMAC-SHA256 del header `x-signature` con `MERCADOPAGO_WEBHOOK_SECRET`
+antes de procesar cualquier notificación (ver `isValidSignature` en la ruta del webhook) y,
+además, vuelve a consultar el pago directamente a la API de Mercado Pago antes de tocar la base
+de datos — nunca confía en el estado que venga en el payload de la notificación. Solo cuando el
+estado real es `approved` se marca el pedido como `PAID`, se guarda el `payment_id` y se descuenta
+el stock.
+
+## Zona de envío
+
+Por ahora la tienda solo envía a **Villa María** y **Villa Nueva**. Antes de mostrar el
+formulario de pago, `DeliveryAreaGate` (`src/components/checkout/DeliveryAreaGate.tsx`) pide al
+cliente que confirme su localidad. Si elige "Otra localidad", no se le ofrece el checkout
+automático: se le explica que la única opción es coordinar el retiro personal en Villa Nueva, y
+se le da un botón que abre WhatsApp (`NEXT_PUBLIC_WHATSAPP_NUMBER`) con un mensaje prellenado que
+incluye el detalle de su carrito, para que la coordinación la haga la dueña del negocio
+directamente por chat.
+
 ## Notas de implementación
 
-- Las imágenes de producto se muestran como marcadores ilustrados (paw icon) porque el proyecto
-  no incluye fotografía real; sustituye `product.images` y los componentes de tarjeta/detalle por
-  `next/image` apuntando a tus assets cuando tengas fotografía de catálogo.
+- Moneda: pesos argentinos (ARS) en toda la app (`formatCurrency` en `src/lib/utils.ts` y
+  `currency_id` en la preferencia de Mercado Pago).
+- Las camas ya tienen fotografía real de catálogo (`public/images/productos/`); la ropa todavía
+  se muestra con un marcador ilustrado (paw icon) hasta que se sumen esas fotos al seed.
 - El precio de cada producto se recalcula en el servidor al crear la preferencia de pago — nunca
   se confía en el precio enviado desde el cliente.
 - El stock se descuenta únicamente cuando el webhook confirma un pago `approved`, evitando
