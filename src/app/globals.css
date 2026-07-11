@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-linen: #faf6ee;
+  --color-linen-dark: #f2ebdc;
+
+  --color-sage-50: #f4f7ef;
+  --color-sage-100: #e7eede;
+  --color-sage-200: #d3e0c3;
+  --color-sage-300: #b9cfa6;
+  --color-sage-400: #9fbd8b;
+  --color-sage-500: #85a771;
+  --color-sage-600: #6c8c5a;
+  --color-sage-700: #567146;
+
+  --color-beige-100: #f4ead9;
+  --color-beige-200: #e9dabd;
+  --color-beige-300: #dbc39a;
+
+  --color-english-700: #26402f;
+  --color-english-800: #1c3325;
+  --color-english-900: #14251b;
+
+  --color-ink: #2b2a25;
+
+  --background: var(--color-linen);
+  --foreground: var(--color-ink);
 }
 
 @theme inline {
+  --color-linen: var(--color-linen);
+  --color-linen-dark: var(--color-linen-dark);
+
+  --color-sage-50: var(--color-sage-50);
+  --color-sage-100: var(--color-sage-100);
+  --color-sage-200: var(--color-sage-200);
+  --color-sage-300: var(--color-sage-300);
+  --color-sage-400: var(--color-sage-400);
+  --color-sage-500: var(--color-sage-500);
+  --color-sage-600: var(--color-sage-600);
+  --color-sage-700: var(--color-sage-700);
+
+  --color-beige-100: var(--color-beige-100);
+  --color-beige-200: var(--color-beige-200);
+  --color-beige-300: var(--color-beige-300);
+
+  --color-english-700: var(--color-english-700);
+  --color-english-800: var(--color-english-800);
+  --color-english-900: var(--color-english-900);
+
+  --color-ink: var(--color-ink);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+* {
+  scrollbar-color: var(--color-sage-400) var(--color-linen);
+}
+
+.text-balance {
+  text-wrap: balance;
 }

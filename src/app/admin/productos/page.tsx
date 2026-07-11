@@ -1,0 +1,20 @@
+import { getProducts } from "@/server/services/products";
+import { ProductForm } from "@/components/admin/ProductForm";
+import { ProductsList } from "@/components/admin/ProductsList";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminProductsPage() {
+  const products = await getProducts();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl italic text-english-900">Productos</h1>
+        <p className="text-sm text-ink/60">Gestiona el catálogo de ropa y camas de la tienda.</p>
+      </div>
+      <ProductForm />
+      <ProductsList products={products} />
+    </div>
+  );
+}
