@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PawPrint, Plus } from "lucide-react";
@@ -27,9 +28,19 @@ export function ProductCard({ product }: { product: ProductDTO }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-sage-200/70 bg-white/70 transition-shadow hover:shadow-xl hover:shadow-sage-900/5">
       <Link href={`/producto/${product.slug}`} className="relative block aspect-square overflow-hidden bg-gradient-to-br from-sage-100 to-beige-100">
-        <div className="flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105">
-          <PawPrint className="h-16 w-16 text-sage-400/50" strokeWidth={1.2} />
-        </div>
+        {product.images[0] ? (
+          <Image
+            src={product.images[0]}
+            alt={product.title}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105">
+            <PawPrint className="h-16 w-16 text-sage-400/50" strokeWidth={1.2} />
+          </div>
+        )}
         {discount && (
           <span className="absolute left-3 top-3 rounded-full bg-english-700 px-3 py-1 text-xs font-semibold text-linen">
             {discount}% OFF

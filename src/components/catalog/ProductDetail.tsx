@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Minus, PawPrint, Plus } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
@@ -11,6 +12,7 @@ import type { ProductDTO, ProductSize } from "@/types/catalog";
 export function ProductDetail({ product }: { product: ProductDTO }) {
   const [size, setSize] = useState<ProductSize | null>(product.sizes[0] ?? null);
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
   const { addItem } = useCart();
   const router = useRouter();
 
@@ -21,12 +23,41 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-2 md:px-8">
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-sage-100 to-beige-100">
-        <PawPrint className="h-24 w-24 text-sage-400/50" strokeWidth={1} />
-        {discount && (
-          <span className="absolute left-4 top-4 rounded-full bg-english-700 px-3 py-1 text-xs font-semibold text-linen">
-            {discount}% OFF
-          </span>
+      <div>
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-sage-100 to-beige-100">
+          {product.images[activeImage] ? (
+            <Image
+              src={product.images[activeImage]}
+              alt={product.title}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <PawPrint className="h-24 w-24 text-sage-400/50" strokeWidth={1} />
+          )}
+          {discount && (
+            <span className="absolute left-4 top-4 rounded-full bg-english-700 px-3 py-1 text-xs font-semibold text-linen">
+              {discount}% OFF
+            </span>
+          )}
+        </div>
+        {product.images.length > 1 && (
+          <div className="mt-3 flex gap-2">
+            {product.images.map((image, index) => (
+              <button
+                key={image}
+                onClick={() => setActiveImage(index)}
+                className={cn(
+                  "relative h-16 w-16 overflow-hidden rounded-xl border-2",
+                  activeImage === index ? "border-english-700" : "border-transparent"
+                )}
+              >
+                <Image src={image} alt={`${product.title} foto ${index + 1}`} fill className="object-cover" />
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
