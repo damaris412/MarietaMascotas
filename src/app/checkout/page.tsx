@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCart } from "@/components/providers/CartProvider";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { GuestCheckoutForm } from "@/components/checkout/GuestCheckoutForm";
+import { DeliveryAreaGate } from "@/components/checkout/DeliveryAreaGate";
 
 export default function CheckoutPage() {
   const { items } = useCart();
@@ -28,12 +29,14 @@ export default function CheckoutPage() {
   return (
     <div className="mx-auto max-w-5xl px-5 py-12 md:px-8">
       <h1 className="mb-8 font-display text-3xl italic text-english-900">Finalizar compra</h1>
-      <div className="grid gap-8 md:grid-cols-[1.2fr,1fr]">
-        <div className="rounded-3xl border border-sage-200/70 bg-white/70 p-6">
-          <GuestCheckoutForm />
+      <DeliveryAreaGate>
+        <div className="grid gap-8 md:grid-cols-[1.2fr,1fr]">
+          <div className="rounded-3xl border border-sage-200/70 bg-white/70 p-6">
+            <GuestCheckoutForm />
+          </div>
+          <OrderSummary />
         </div>
-        <OrderSummary />
-      </div>
+      </DeliveryAreaGate>
     </div>
   );
 }
