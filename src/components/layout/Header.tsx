@@ -5,6 +5,7 @@ import { ShoppingBag, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useCart } from "@/components/providers/CartProvider";
+import { AccountMenu } from "@/components/layout/AccountMenu";
 
 const NAV_LINKS = [
   { href: "/catalogo", label: "Catálogo" },
@@ -38,6 +39,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <AccountMenu />
+          </div>
           <button
             onClick={openCart}
             aria-label="Abrir carrito"
@@ -72,6 +76,9 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <div className="mt-2 px-3">
+            <AccountMenu />
+          </div>
         </nav>
       )}
     </header>

@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { X } from "lucide-react";
 import { productSchema, type ProductInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import type { ProductDTO } from "@/types/catalog";
 
 const SIZE_OPTIONS = ["S", "M", "L"] as const;
 
-export function ProductForm() {
+export function ProductForm({
+  product,
+  onDone,
+}: {
+  product?: ProductDTO | null;
+  onDone?: () => void;
+}) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const isEditing = !!product;
 
   const {
     register,
@@ -25,18 +34,39 @@ export function ProductForm() {
     defaultValues: { category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false },
   });
 
+  useEffect(() => {
+    if (product) {
+      reset({
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        previousPrice: product.previousPrice,
+        stock: product.stock,
+        sizes: product.sizes,
+        featured: product.featured,
+      });
+    } else {
+      reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
+    }
+  }, [product, reset]);
+
   async function onSubmit(data: ProductInput) {
     setServerError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch(
+        isEditing ? `/api/admin/products/${product.id}` : "/api/admin/products",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "No se pudo crear el producto.");
-      reset();
+      if (!res.ok) throw new Error(json.error ?? "No se pudo guardar el producto.");
+      reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
+      onDone?.();
       router.refresh();
     } catch (error) {
       setServerError(error instanceof Error ? error.message : "Ocurrió un error inesperado.");
@@ -49,6 +79,21 @@ export function ProductForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 rounded-3xl border border-sage-200/70 bg-white/80 p-6 md:grid-cols-2">
+      <div className="flex items-center justify-between md:col-span-2">
+        <h2 className="font-display text-lg italic text-english-800">
+          {isEditing ? `Editando: ${product.title}` : "Crear producto"}
+        </h2>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={onDone}
+            className="flex items-center gap-1 text-xs font-medium text-ink/50 hover:text-ink"
+          >
+            <X className="h-3.5 w-3.5" /> Cancelar edición
+          </button>
+        )}
+      </div>
+
       <div className="md:col-span-2">
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">Título</label>
         <input {...register("title")} className={inputClass} placeholder="Abrigo acolchado Eucalipto" />
@@ -140,7 +185,7 @@ export function ProductForm() {
         disabled={loading}
         className="rounded-full bg-english-700 py-3 text-sm font-semibold text-linen hover:bg-english-800 disabled:opacity-50 md:col-span-2"
       >
-        {loading ? "Guardando..." : "Crear producto"}
+        {loading ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear producto"}
       </button>
     </form>
   );
