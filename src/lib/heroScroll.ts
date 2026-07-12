@@ -1,5 +1,5 @@
-// Debe coincidir con la altura h-[700vh] del contenedor en src/components/home/Hero.tsx
-export const HERO_SCROLL_VH = 700;
+// Debe coincidir con la altura h-[800vh] del contenedor en src/components/home/Hero.tsx
+export const HERO_SCROLL_VH = 800;
 
 export function getHeroPinnedProgress(scrollY: number, viewportHeight: number) {
   const pinDistance = (HERO_SCROLL_VH / 100 - 1) * viewportHeight;
