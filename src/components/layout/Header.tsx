@@ -22,7 +22,9 @@ export function Header() {
   const { count, openCart } = useCart();
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const [hidden, setHidden] = useState(isHome);
+  // Por defecto siempre visible: en mobile el hero no tiene scroll-pin (es
+  // tap-to-play), así que el nav nunca debería ocultarse ahí.
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     if (!isHome) {
@@ -32,6 +34,11 @@ export function Header() {
       return;
     }
     function update() {
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      if (isMobile) {
+        setHidden(false);
+        return;
+      }
       const progress = getHeroPinnedProgress(window.scrollY, window.innerHeight);
       setHidden(progress < 0.9);
     }
