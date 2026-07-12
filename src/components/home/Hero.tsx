@@ -9,7 +9,7 @@ const CHAPTERS: { range: [number, number]; eyebrow?: string; title: string }[] =
   { range: [0, 0.16], eyebrow: "Bienvenidos a", title: "Marieta Mascotas" },
   { range: [0.18, 0.36], title: "La mejor tienda para tu mejor amigo" },
   { range: [0.38, 0.56], title: "Diseño y amor en cada prenda" },
-  { range: [0.58, 0.76], title: "Y cuando querés algo único..." },
+  { range: [0.58, 0.8], title: "Elegí tu manera de vestirlo" },
 ];
 
 function ChapterText({
@@ -59,6 +59,11 @@ export function Hero() {
     offset: ["start start", "end end"],
   });
 
+  function captureDuration(e: React.SyntheticEvent<HTMLVideoElement>) {
+    const value = e.currentTarget.duration;
+    if (Number.isFinite(value) && value > 0) setDuration(value);
+  }
+
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     const video = videoRef.current;
     if (!video || !duration) return;
@@ -79,7 +84,8 @@ export function Hero() {
           muted
           playsInline
           preload="auto"
-          onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+          onLoadedMetadata={captureDuration}
+          onDurationChange={captureDuration}
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-black/25" />
