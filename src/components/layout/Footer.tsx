@@ -20,8 +20,8 @@ export function Footer() {
             Tienda
           </h3>
           <ul className="space-y-2.5 text-sm text-linen/80">
-            <li><Link href="/catalogo?categoria=ROPA" className="hover:text-linen">Ropa</Link></li>
-            <li><Link href="/catalogo?categoria=CAMAS" className="hover:text-linen">Camas</Link></li>
+            <li><Link href="/catalogo?categoria=ropa" className="hover:text-linen">Ropa</Link></li>
+            <li><Link href="/catalogo?categoria=camas" className="hover:text-linen">Camas</Link></li>
             <li><Link href="/catalogo" className="hover:text-linen">Todo el catálogo</Link></li>
           </ul>
         </div>

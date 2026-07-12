@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { productSchema, type ProductInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
-import type { ProductDTO } from "@/types/catalog";
+import { MediaUploader } from "@/components/admin/MediaUploader";
+import type { CategoryDTO, ProductDTO } from "@/types/catalog";
 
 const SIZE_OPTIONS = ["S", "M", "L"] as const;
 
@@ -23,61 +24,101 @@ export function ProductForm({
   const [loading, setLoading] = useState(false);
   const isEditing = !!product;
 
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ProductInput>({
     resolver: zodResolver(productSchema),
-    defaultValues: { category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false },
+    defaultValues: { sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] },
   });
 
-  const [imagesText, setImagesText] = useState("");
+  function loadCategories(selectId?: string) {
+    fetch("/api/categories")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.categories) {
+          setCategories(data.categories);
+          if (selectId) setValue("categoryId", selectId);
+          else if (!isEditing && data.categories[0]) setValue("categoryId", data.categories[0].id);
+        }
+      })
+      .catch(() => {});
+  }
+
+  useEffect(() => {
+    loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [imagesText, setImagesText] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
       reset({
         title: product.title,
         description: product.description,
-        category: product.category,
+        categoryId: product.category.id,
         price: product.price,
         previousPrice: product.previousPrice,
         stock: product.stock,
         sizes: product.sizes,
         featured: product.featured,
+        images: product.images,
       });
-      // Sincroniza el textarea de imágenes (fuera de react-hook-form) con el
-      // producto seleccionado para editar, igual que "reset" arriba.
+      // Sincroniza el uploader (fuera de react-hook-form) con el producto
+      // seleccionado para editar, igual que "reset" arriba.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setImagesText(product.images.join("\n"));
+      setImagesText(product.images);
     } else {
-      reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
-      setImagesText("");
+      reset({ sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] });
+      setImagesText([]);
     }
   }, [product, reset]);
+
+  async function handleAddCategory() {
+    if (!newCategoryName.trim()) return;
+    setCategoryError(null);
+    try {
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCategoryName.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "No se pudo crear la categoría.");
+      loadCategories(json.category.id);
+      setNewCategoryName("");
+      setAddingCategory(false);
+    } catch (error) {
+      setCategoryError(error instanceof Error ? error.message : "Ocurrió un error inesperado.");
+    }
+  }
 
   async function onSubmit(data: ProductInput) {
     setServerError(null);
     setLoading(true);
     try {
-      const images = imagesText
-        .split("\n")
-        .map((url) => url.trim())
-        .filter(Boolean);
       const res = await fetch(
         isEditing ? `/api/admin/products/${product.id}` : "/api/admin/products",
         {
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, images }),
+          body: JSON.stringify({ ...data, images: imagesText }),
         }
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo guardar el producto.");
-      reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
-      setImagesText("");
+      reset({ sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] });
+      setImagesText([]);
       onDone?.();
       router.refresh();
     } catch (error) {
@@ -120,10 +161,52 @@ export function ProductForm({
 
       <div>
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">Categoría</label>
-        <select {...register("category")} className={inputClass}>
-          <option value="ROPA">Ropa</option>
-          <option value="CAMAS">Camas</option>
+        <select {...register("categoryId")} className={inputClass}>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
         </select>
+        {errors.categoryId && <p className="mt-1 text-xs text-red-500">{errors.categoryId.message}</p>}
+
+        {addingCategory ? (
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="Ej. Juguetes"
+              className="flex-1 rounded-lg border border-sage-300 bg-white px-3 py-1.5 text-xs outline-none focus:border-english-600"
+            />
+            <button
+              type="button"
+              onClick={handleAddCategory}
+              className="rounded-lg bg-english-700 px-3 py-1.5 text-xs font-semibold text-linen hover:bg-english-800"
+            >
+              Agregar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAddingCategory(false);
+                setNewCategoryName("");
+                setCategoryError(null);
+              }}
+              className="text-xs text-ink/50 hover:text-ink"
+            >
+              Cancelar
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAddingCategory(true)}
+            className="mt-2 flex items-center gap-1 text-xs font-semibold text-english-700 hover:text-english-800"
+          >
+            <Plus className="h-3 w-3" /> Nueva categoría
+          </button>
+        )}
+        {categoryError && <p className="mt-1 text-xs text-red-500">{categoryError}</p>}
       </div>
 
       <div>
@@ -146,6 +229,9 @@ export function ProductForm({
           {...register("previousPrice", { setValueAs: (v) => (v === "" ? null : Number(v)) })}
           className={inputClass}
         />
+        <p className="mt-1 text-xs text-ink/40">
+          Cargalo para mostrar el precio tachado y el % OFF — así se marca una oferta.
+        </p>
       </div>
 
       <div className="md:col-span-2">
@@ -185,19 +271,9 @@ export function ProductForm({
 
       <div className="md:col-span-2">
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">
-          Imágenes (una URL por línea)
+          Fotos / video del producto
         </label>
-        <textarea
-          value={imagesText}
-          onChange={(e) => setImagesText(e.target.value)}
-          rows={3}
-          className={inputClass}
-          placeholder="/images/productos/mi-producto.png"
-        />
-        <p className="mt-1 text-xs text-ink/40">
-          Pegá la ruta o URL de cada foto del producto, una por línea. La primera es la que se
-          usa como miniatura.
-        </p>
+        <MediaUploader value={imagesText} onChange={setImagesText} />
       </div>
 
       <label className="flex items-center gap-2 text-sm text-ink/70 md:col-span-2">

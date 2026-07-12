@@ -49,7 +49,7 @@ export type ProfileInput = z.infer<typeof profileSchema>;
 export const productSchema = z.object({
   title: z.string().min(3, "El título es muy corto"),
   description: z.string().min(10, "La descripción es muy corta"),
-  category: z.enum(["ROPA", "CAMAS"]),
+  categoryId: z.string().min(1, "Elegí una categoría"),
   price: z.number().positive("El precio debe ser mayor a 0"),
   previousPrice: z.number().positive().nullable().optional(),
   stock: z.number().int().min(0),
@@ -59,6 +59,12 @@ export const productSchema = z.object({
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
+
+export const categorySchema = z.object({
+  name: z.string().min(2, "El nombre es muy corto").max(40, "El nombre es muy largo"),
+});
+
+export type CategoryInput = z.infer<typeof categorySchema>;
 
 export const storeSettingsSchema = z.object({
   shippingCost: z.number().min(0, "El costo de envío no puede ser negativo"),
@@ -87,6 +93,7 @@ export const jobApplicationSchema = z.object({
     .max(20, "El teléfono no es válido")
     .regex(/^[0-9+\s-]+$/, "El teléfono solo puede tener números, espacios, + y -"),
   area: applicationAreaSchema,
+  resumeUrl: z.string().url().optional(),
   message: z.string().min(10, "Contanos un poco más (mínimo 10 caracteres)"),
 });
 

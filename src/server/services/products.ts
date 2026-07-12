@@ -3,7 +3,7 @@ import type { ProductDTO } from "@/types/catalog";
 import type { Prisma } from "@prisma/client";
 
 export type CatalogFilters = {
-  category?: "ROPA" | "CAMAS";
+  categorySlug?: string;
   size?: "S" | "M" | "L";
   minPrice?: number;
   maxPrice?: number;
@@ -14,7 +14,7 @@ function toDTO(product: {
   title: string;
   slug: string;
   description: string;
-  category: string;
+  category: { id: string; name: string; slug: string };
   price: Prisma.Decimal;
   previousPrice: Prisma.Decimal | null;
   images: string[];
@@ -27,16 +27,17 @@ function toDTO(product: {
 }): ProductDTO {
   return {
     ...product,
-    category: product.category as ProductDTO["category"],
     sizes: product.sizes as ProductDTO["sizes"],
     price: Number(product.price),
     previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
   };
 }
 
+const withCategory = { category: { select: { id: true, name: true, slug: true } } };
+
 export async function getProducts(filters: CatalogFilters = {}): Promise<ProductDTO[]> {
   const where: Prisma.ProductWhereInput = { active: true };
-  if (filters.category) where.category = filters.category;
+  if (filters.categorySlug) where.category = { slug: filters.categorySlug };
   if (filters.size) where.sizes = { has: filters.size };
   if (filters.minPrice || filters.maxPrice) {
     where.price = {
@@ -47,6 +48,7 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<Product
 
   const products = await prisma.product.findMany({
     where,
+    include: withCategory,
     orderBy: { createdAt: "desc" },
   });
 
@@ -56,6 +58,7 @@ export async function getProducts(filters: CatalogFilters = {}): Promise<Product
 export async function getFeaturedProducts(limit = 8): Promise<ProductDTO[]> {
   const products = await prisma.product.findMany({
     where: { active: true, featured: true },
+    include: withCategory,
     orderBy: { createdAt: "desc" },
     take: limit,
   });
@@ -63,16 +66,26 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductDTO[]> {
 }
 
 export async function getAllProductsForAdmin(): Promise<ProductDTO[]> {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+  const products = await prisma.product.findMany({
+    include: withCategory,
+    orderBy: { createdAt: "desc" },
+  });
   return products.map(toDTO);
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductDTO | null> {
-  const product = await prisma.product.findUnique({ where: { slug } });
+  const product = await prisma.product.findUnique({ where: { slug }, include: withCategory });
   return product ? toDTO(product) : null;
 }
 
 export async function getProductsByIds(ids: string[]) {
-  const products = await prisma.product.findMany({ where: { id: { in: ids } } });
+  const products = await prisma.product.findMany({
+    where: { id: { in: ids } },
+    include: withCategory,
+  });
   return products.map(toDTO);
+}
+
+export async function getCategories() {
+  return prisma.category.findMany({ orderBy: { name: "asc" } });
 }

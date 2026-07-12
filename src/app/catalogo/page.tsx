@@ -18,7 +18,7 @@ export default async function CatalogoPage({
   const params = await searchParams;
 
   const products = await getProducts({
-    category: params.categoria === "ROPA" || params.categoria === "CAMAS" ? params.categoria : undefined,
+    categorySlug: params.categoria || undefined,
     size: params.talla === "S" || params.talla === "M" || params.talla === "L" ? params.talla : undefined,
     maxPrice: params.precioMax ? Number(params.precioMax) : undefined,
   });

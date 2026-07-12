@@ -9,8 +9,8 @@ import { AccountMenu } from "@/components/layout/AccountMenu";
 
 const NAV_LINKS = [
   { href: "/catalogo", label: "Catálogo" },
-  { href: "/catalogo?categoria=ROPA", label: "Ropa" },
-  { href: "/catalogo?categoria=CAMAS", label: "Camas" },
+  { href: "/catalogo?categoria=ropa", label: "Ropa" },
+  { href: "/catalogo?categoria=camas", label: "Camas" },
   { href: "/nosotros", label: "Nosotros" },
 ];
 

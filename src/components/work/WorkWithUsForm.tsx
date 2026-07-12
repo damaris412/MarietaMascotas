@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { upload } from "@vercel/blob/client";
+import { CheckCircle2, FileText, Loader2, MessageCircle, Upload as UploadIcon, X } from "lucide-react";
 import { jobApplicationSchema, type JobApplicationInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +23,34 @@ export function WorkWithUsForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState<{ name: string; area: string } | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeName, setResumeName] = useState<string | null>(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<JobApplicationInput>({ resolver: zodResolver(jobApplicationSchema) });
+
+  async function handleResumeUpload(file: File | undefined) {
+    if (!file) return;
+    setUploadError(null);
+    setUploadingResume(true);
+    try {
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/trabaja-con-nosotros/upload",
+      });
+      setResumeUrl(blob.url);
+      setResumeName(file.name);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "No se pudo subir el archivo.");
+    } finally {
+      setUploadingResume(false);
+    }
+  }
 
   async function onSubmit(data: JobApplicationInput) {
     setServerError(null);
@@ -36,7 +59,7 @@ export function WorkWithUsForm() {
       const res = await fetch("/api/trabaja-con-nosotros", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, resumeUrl: resumeUrl ?? undefined }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo enviar tu postulación.");
@@ -131,6 +154,52 @@ export function WorkWithUsForm() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">
+          Tu CV, carta de presentación o propuesta (opcional)
+        </label>
+        {resumeUrl ? (
+          <div className="flex items-center justify-between rounded-xl border border-sage-300 bg-sage-50 px-4 py-3 text-sm">
+            <span className="flex items-center gap-2 text-ink/80">
+              <FileText className="h-4 w-4 text-english-700" /> {resumeName}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setResumeUrl(null);
+                setResumeName(null);
+              }}
+              className="text-ink/40 hover:text-red-500"
+              aria-label="Quitar archivo"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label
+            className={cn(
+              "flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-sage-300 px-4 py-4 text-sm text-ink/60 transition-colors hover:border-english-500 hover:text-english-700",
+              uploadingResume && "pointer-events-none opacity-60"
+            )}
+          >
+            {uploadingResume ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <UploadIcon className="h-4 w-4" />
+            )}
+            {uploadingResume ? "Subiendo..." : "Subir archivo (PDF, Word o imagen)"}
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,image/*"
+              className="hidden"
+              disabled={uploadingResume}
+              onChange={(e) => handleResumeUpload(e.target.files?.[0])}
+            />
+          </label>
+        )}
+        {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
       </div>
 
       <div>
