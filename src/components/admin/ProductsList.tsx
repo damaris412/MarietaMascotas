@@ -130,7 +130,7 @@ export function ProductsList({
                 </td>
                 <td className="px-5 py-3 font-medium text-ink">{product.title}</td>
                 <td className="px-5 py-3 text-ink/70">
-                  {product.category === "ROPA" ? "Ropa" : "Camas"}
+                  {product.category.name}
                 </td>
                 <td className="px-5 py-3 text-english-800">{formatCurrency(product.price)}</td>
                 <td className="px-5 py-3">

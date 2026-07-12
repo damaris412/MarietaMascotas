@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     data: {
       title: data.title,
       description: data.description,
-      category: data.category,
+      categoryId: data.categoryId,
       price: data.price,
       previousPrice: data.previousPrice ?? null,
       stock: data.stock,

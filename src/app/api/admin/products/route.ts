@@ -10,7 +10,10 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+  const products = await prisma.product.findMany({
+    include: { category: { select: { id: true, name: true, slug: true } } },
+    orderBy: { createdAt: "desc" },
+  });
   return NextResponse.json({ products });
 }
 
@@ -42,7 +45,7 @@ export async function POST(req: NextRequest) {
       title: data.title,
       slug,
       description: data.description,
-      category: data.category,
+      categoryId: data.categoryId,
       price: data.price,
       previousPrice: data.previousPrice ?? null,
       stock: data.stock,

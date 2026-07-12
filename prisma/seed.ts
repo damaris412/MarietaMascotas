@@ -237,11 +237,29 @@ const PRODUCTS = [
 ];
 
 async function main() {
-  for (const product of PRODUCTS) {
+  const categoryBySlug: Record<"ROPA" | "CAMAS", string> = {
+    ROPA: (
+      await prisma.category.upsert({
+        where: { slug: "ropa" },
+        update: {},
+        create: { name: "Ropa", slug: "ropa" },
+      })
+    ).id,
+    CAMAS: (
+      await prisma.category.upsert({
+        where: { slug: "camas" },
+        update: {},
+        create: { name: "Camas", slug: "camas" },
+      })
+    ).id,
+  };
+
+  for (const { category, ...product } of PRODUCTS) {
+    const data = { ...product, categoryId: categoryBySlug[category] };
     await prisma.product.upsert({
       where: { slug: product.slug },
-      update: { ...product },
-      create: { ...product },
+      update: data,
+      create: data,
     });
   }
   console.log(`Seed completado: ${PRODUCTS.length} productos.`);

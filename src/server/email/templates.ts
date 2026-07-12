@@ -44,6 +44,7 @@ export function ownerNotificationEmail(data: {
   phone: string;
   area: string;
   message: string;
+  resumeUrl?: string;
 }) {
   return `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf6ee; padding:32px;">
@@ -56,6 +57,7 @@ export function ownerNotificationEmail(data: {
         <p><strong>Correo:</strong> ${data.email}</p>
         <p><strong>Teléfono:</strong> ${data.phone}</p>
         <p><strong>Área:</strong> ${areaLabel(data.area)}</p>
+        ${data.resumeUrl ? `<p><strong>CV / propuesta:</strong> <a href="${data.resumeUrl}">${data.resumeUrl}</a></p>` : ""}
         <p><strong>Mensaje:</strong></p>
         <p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${data.message}</p>
       </div>

@@ -1,12 +1,17 @@
-export type ProductCategory = "ROPA" | "CAMAS";
 export type ProductSize = "S" | "M" | "L";
+
+export type CategoryDTO = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 export type ProductDTO = {
   id: string;
   title: string;
   slug: string;
   description: string;
-  category: ProductCategory;
+  category: CategoryDTO;
   price: number;
   previousPrice: number | null;
   images: string[];

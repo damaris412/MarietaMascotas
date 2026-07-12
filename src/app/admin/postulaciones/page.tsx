@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { FileText } from "lucide-react";
 import { getJobApplications } from "@/server/services/applications";
 import { areaLabel } from "@/server/email/templates";
 
@@ -23,6 +25,7 @@ export default async function AdminPostulacionesPage() {
               <th className="px-5 py-3">Contacto</th>
               <th className="px-5 py-3">Área</th>
               <th className="px-5 py-3">Mensaje</th>
+              <th className="px-5 py-3">CV</th>
               <th className="px-5 py-3">Fecha</th>
             </tr>
           </thead>
@@ -36,6 +39,20 @@ export default async function AdminPostulacionesPage() {
                 </td>
                 <td className="px-5 py-3 text-ink/70">{areaLabel(app.area)}</td>
                 <td className="max-w-[280px] px-5 py-3 text-ink/70">{app.message}</td>
+                <td className="px-5 py-3">
+                  {app.resumeUrl ? (
+                    <Link
+                      href={app.resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs font-semibold text-english-700 hover:text-english-800"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> Ver
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-ink/40">—</span>
+                  )}
+                </td>
                 <td className="px-5 py-3 text-ink/60">
                   {new Intl.DateTimeFormat("es-AR", { dateStyle: "short", timeStyle: "short" }).format(
                     app.createdAt

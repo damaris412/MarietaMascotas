@@ -70,7 +70,7 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
 
       <div>
         <span className="text-xs font-semibold uppercase tracking-widest text-sage-600">
-          {product.category === "ROPA" ? "Ropa" : "Camas"}
+          {product.category.name}
         </span>
         <h1 className="mt-2 font-display text-3xl italic text-english-900">{product.title}</h1>
         <div className="mt-3">

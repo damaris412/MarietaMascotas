@@ -1,15 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
-
-const CATEGORIES = [
-  { value: "", label: "Todo" },
-  { value: "ROPA", label: "Ropa" },
-  { value: "CAMAS", label: "Camas" },
-];
+import type { CategoryDTO } from "@/types/catalog";
 
 const SIZES = ["S", "M", "L"];
 const MAX_PRICE = 400000;
@@ -19,6 +14,16 @@ export function FilterBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.categories) setCategories(data.categories);
+      })
+      .catch(() => {});
+  }, []);
 
   const category = searchParams.get("categoria") ?? "";
   const size = searchParams.get("talla") ?? "";
@@ -44,18 +49,29 @@ export function FilterBar() {
     <div className="sticky top-[65px] z-30 border-b border-sage-200/70 bg-linen/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex gap-2 overflow-x-auto">
-          {CATEGORIES.map((c) => (
+          <button
+            onClick={() => applyParams({ categoria: "" })}
+            className={cn(
+              "whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+              category === ""
+                ? "border-english-700 bg-english-700 text-linen"
+                : "border-sage-300 text-ink/70 hover:bg-sage-100"
+            )}
+          >
+            Todo
+          </button>
+          {categories.map((c) => (
             <button
-              key={c.value}
-              onClick={() => applyParams({ categoria: c.value })}
+              key={c.id}
+              onClick={() => applyParams({ categoria: c.slug })}
               className={cn(
                 "whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                category === c.value
+                category === c.slug
                   ? "border-english-700 bg-english-700 text-linen"
                   : "border-sage-300 text-ink/70 hover:bg-sage-100"
               )}
             >
-              {c.label}
+              {c.name}
             </button>
           ))}
         </div>
