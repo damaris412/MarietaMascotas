@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
+import { SastreriaTeaser } from "@/components/home/SastreriaTeaser";
 import { ValueProps } from "@/components/home/ValueProps";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { getFeaturedProducts } from "@/server/services/products";
@@ -12,6 +13,7 @@ export default async function Home() {
   return (
     <>
       <Hero />
+      <SastreriaTeaser />
       <ValueProps />
 
       <section className="mx-auto max-w-7xl px-5 py-16 md:px-8">

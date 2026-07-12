@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, PackageSearch, ShoppingCart, LogOut, Settings, Users } from "lucide-react";
+import { LayoutDashboard, PackageSearch, ShoppingCart, LogOut, Ruler, Settings, Users } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/admin/dashboard", label: "Analíticas", icon: LayoutDashboard },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { href: "/admin/productos", label: "Productos", icon: PackageSearch },
+  { href: "/admin/sastreria", label: "Sastrería a medida", icon: Ruler },
   { href: "/admin/postulaciones", label: "Postulaciones", icon: Users },
   { href: "/admin/configuracion", label: "Configuración", icon: Settings },
 ];
