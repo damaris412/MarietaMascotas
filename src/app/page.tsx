@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
-import { PostHeroCTAs } from "@/components/home/PostHeroCTAs";
 import { ValueProps } from "@/components/home/ValueProps";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { getFeaturedProducts } from "@/server/services/products";
@@ -12,8 +11,7 @@ export default async function Home() {
 
   return (
     <>
-      <Hero />
-      <PostHeroCTAs featuredImage={featured[0]?.images[0] ?? null} />
+      <Hero featuredImage={featured[0]?.images[0] ?? null} />
       <ValueProps />
 
       <section className="mx-auto max-w-7xl px-5 py-16 md:px-8">
