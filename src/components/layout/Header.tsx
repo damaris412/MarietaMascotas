@@ -54,8 +54,15 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-sage-200/70 bg-linen/85 backdrop-blur-md transition-all duration-300",
-        hidden ? "pointer-events-none -translate-y-full opacity-0" : "translate-y-0 opacity-100"
+        // backdrop-blur es una operación pesada para la GPU que, en un header
+        // sticky sobre contenido que scrollea (como el grid de fotos del
+        // catálogo), causa artefactos de repintado/arrastre en varios Android
+        // — se deja solo para desktop, en mobile un fondo sólido alcanza.
+        "sticky top-0 z-40 border-b border-sage-200/70 bg-linen md:bg-linen/85 md:backdrop-blur-md md:transition-all md:duration-300",
+        // `hidden` nunca es true en mobile (ver efecto arriba), así que ahí no
+        // hace falta transform/transition — evita una capa de composición GPU
+        // extra en el header sticky durante el scroll táctil.
+        hidden && "pointer-events-none md:-translate-y-full md:opacity-0"
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">

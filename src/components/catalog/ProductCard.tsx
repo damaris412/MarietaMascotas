@@ -28,7 +28,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
   }
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-3xl border border-sage-200/70 bg-white/70 transition-shadow hover:shadow-xl hover:shadow-sage-900/5">
+    <div className="group isolate relative flex flex-col overflow-hidden rounded-3xl border border-sage-200/70 bg-white/70 transition-shadow md:hover:shadow-xl md:hover:shadow-sage-900/5">
       <Link href={`/producto/${product.slug}`} className="relative block aspect-square overflow-hidden bg-gradient-to-br from-sage-100 to-beige-100">
         {product.images[0] ? (
           <Image
@@ -37,12 +37,12 @@ export function ProductCard({ product }: { product: ProductDTO }) {
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
             className={cn(
-              "object-cover transition-transform duration-500 group-hover:scale-105",
+              "object-cover md:transition-transform md:duration-500 md:group-hover:scale-105",
               outOfStock && "grayscale-[35%]"
             )}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center transition-transform duration-500 group-hover:scale-105">
+          <div className="flex h-full w-full items-center justify-center md:transition-transform md:duration-500 md:group-hover:scale-105">
             <PawPrint className="h-16 w-16 text-sage-400/50" strokeWidth={1.2} />
           </div>
         )}
@@ -112,7 +112,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
               "flex w-full items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-semibold shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none",
               added
                 ? "bg-sage-500 text-linen"
-                : "bg-english-700 text-linen hover:-translate-y-0.5 hover:bg-english-800 hover:shadow-lg hover:shadow-english-800/30 active:translate-y-0"
+                : "bg-english-700 text-linen md:hover:-translate-y-0.5 md:hover:bg-english-800 md:hover:shadow-lg md:hover:shadow-english-800/30 md:active:translate-y-0"
             )}
           >
             {outOfStock ? (

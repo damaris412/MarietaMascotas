@@ -1,21 +1,24 @@
+import Image from "next/image";
 import { CustomOrderForm } from "@/components/custom-order/CustomOrderForm";
-import { MeasurementGuideDog } from "@/components/illustrations/MeasurementGuideDog";
 
 const MEASUREMENTS = [
   {
     key: "neck" as const,
+    image: "/images/sastreria/medidas-de-cuello.png",
     title: "Contorno de cuello",
     description:
       "Ni muy arriba ni muy abajo: tiene que pasar justo por donde le pasa la correa a tu mascota.",
   },
   {
     key: "chest" as const,
+    image: "/images/sastreria/contornotorax.png",
     title: "Contorno de tórax",
     description:
       "Justo donde terminan las dos patas delanteras — no en la panza.",
   },
   {
     key: "back" as const,
+    image: "/images/sastreria/largolomo.png",
     title: "Largo de lomo",
     description:
       "Desde la correa del cuello hasta antes de la cola. No incluye la cola.",
@@ -30,12 +33,13 @@ export default function SastreriaAMedidaPage() {
           Sastrería a medida
         </span>
         <h1 className="text-balance font-display text-3xl italic text-english-900 md:text-4xl">
-          Prendas únicas, hechas a la medida exacta de tu mascota
+          Diseños exclusivos, el calce ideal para tu mascota.
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-ink/70">
-          En Marieta Mascotas armamos prendas a medida, como una sastrería, pero para mascotas.
-          Vos nos indicás el diseño o la tela que te gusta, nos contás sobre tu compañero de
-          cuatro patas, y juntos creamos un modelo único, pensado exactamente para su cuerpo.
+          En Marieta Mascotas redefinimos la sastrería animal. Creamos prendas a medida para que
+          tengas tu diseño exclusivo. Nos envías una referencia del modelo o tipo de prenda que te
+          guste (como un vestido o un buzo, ¡una foto de internet es ideal!), nos hablas sobre tu
+          mascota, y juntos creamos una pieza única diseñada para su comodidad.
         </p>
       </div>
 
@@ -48,8 +52,8 @@ export default function SastreriaAMedidaPage() {
         <div className="mt-8 grid gap-8 sm:grid-cols-3">
           {MEASUREMENTS.map((m) => (
             <div key={m.key} className="text-center">
-              <div className="mx-auto w-full max-w-[220px]">
-                <MeasurementGuideDog measurement={m.key} className="w-full" />
+              <div className="relative mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-2xl bg-white">
+                <Image src={m.image} alt={m.title} fill sizes="220px" className="object-contain" />
               </div>
               <h3 className="mt-4 text-sm font-semibold text-english-900">{m.title}</h3>
               <p className="mt-1.5 text-xs leading-relaxed text-ink/60">{m.description}</p>

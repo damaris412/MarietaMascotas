@@ -46,7 +46,7 @@ export function FilterBar() {
   );
 
   return (
-    <div className="sticky top-[65px] z-30 border-b border-sage-200/70 bg-linen/90 backdrop-blur-md">
+    <div className="sticky top-[65px] z-30 border-b border-sage-200/70 bg-linen md:bg-linen/90 md:backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
         <div className="flex gap-2 overflow-x-auto">
           <button
