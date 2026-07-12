@@ -1,16 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+import { HeroCTAs } from "@/components/home/HeroCTAs";
+import { cn } from "@/lib/utils";
 
 const VIDEO_SRC = "/video/hero-marieta-mascotas.mp4";
+const PAD = 0.02;
 
 const CHAPTERS: { range: [number, number]; eyebrow?: string; title: string }[] = [
-  { range: [0, 0.16], eyebrow: "Bienvenidos a", title: "Marieta Mascotas" },
-  { range: [0.18, 0.36], title: "La mejor tienda para tu mejor amigo" },
-  { range: [0.38, 0.56], title: "Diseño y amor en cada prenda" },
-  { range: [0.58, 0.8], title: "Elegí tu manera de vestirlo" },
+  { range: [0, 0.15], eyebrow: "Bienvenidos a", title: "Marieta Mascotas" },
+  { range: [0.2, 0.4], title: "La mejor tienda para tu mejor amigo" },
+  { range: [0.45, 0.65], title: "Diseño y amor en cada prenda" },
 ];
+
+const CTA_START = 0.78;
+const CTA_VISIBLE = 0.88;
 
 function ChapterText({
   scrollYProgress,
@@ -24,12 +29,10 @@ function ChapterText({
   title: string;
 }) {
   const [start, end] = range;
-  const pad = 0.03;
-  const opacity = useTransform(
-    scrollYProgress,
-    [Math.max(0, start - pad), start, end, Math.min(1, end + pad)],
-    [0, 1, 1, 0]
-  );
+  const hasLeadIn = start - PAD > 0;
+  const times = hasLeadIn ? [start - PAD, start, end, end + PAD] : [start, start, end, end + PAD];
+  const values = hasLeadIn ? [0, 1, 1, 0] : [1, 1, 1, 0];
+  const opacity = useTransform(scrollYProgress, times, values);
   const y = useTransform(scrollYProgress, [start, end], [24, -24]);
 
   return (
@@ -49,10 +52,12 @@ function ChapterText({
   );
 }
 
-export function Hero() {
+export function Hero({ featuredImage }: { featuredImage: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [duration, setDuration] = useState(0);
+  const [ctaVisible, setCtaVisible] = useState(false);
+  const targetProgressRef = useRef(0);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -65,18 +70,36 @@ export function Hero() {
   }
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    const video = videoRef.current;
-    if (!video || !duration) return;
-    const targetTime = progress * duration;
-    if (Math.abs(video.currentTime - targetTime) > 0.05) {
-      video.currentTime = targetTime;
-    }
+    targetProgressRef.current = progress;
+    setCtaVisible(progress >= CTA_START + 0.02);
   });
 
-  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0]);
+  // Interpola el currentTime del video hacia el progreso de scroll en cada frame,
+  // en vez de "saltar" directo: si se scrollea rápido, hace un fast-forward suave
+  // por los cuadros intermedios en lugar de cortar directo a la escena final.
+  useEffect(() => {
+    if (!duration) return;
+    let frameId: number;
+    function tick() {
+      const video = videoRef.current;
+      if (video) {
+        const target = Math.min(targetProgressRef.current * duration, duration - 0.05);
+        const diff = target - video.currentTime;
+        if (Math.abs(diff) > 0.01) {
+          video.currentTime = video.currentTime + diff * 0.15;
+        }
+      }
+      frameId = requestAnimationFrame(tick);
+    }
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [duration]);
+
+  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const ctaOpacity = useTransform(scrollYProgress, [CTA_START, CTA_VISIBLE], [0, 1]);
 
   return (
-    <section ref={containerRef} className="relative h-[400vh]">
+    <section ref={containerRef} className="relative h-[700vh]">
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-english-900">
         <video
           ref={videoRef}
@@ -93,6 +116,16 @@ export function Hero() {
         {CHAPTERS.map((chapter, i) => (
           <ChapterText key={i} scrollYProgress={scrollYProgress} {...chapter} />
         ))}
+
+        <motion.div
+          style={{ opacity: ctaOpacity }}
+          className={cn(
+            "absolute inset-0 flex items-center justify-center",
+            ctaVisible ? "pointer-events-auto" : "pointer-events-none"
+          )}
+        >
+          <HeroCTAs featuredImage={featuredImage} />
+        </motion.div>
 
         <motion.div
           style={{ opacity: scrollHintOpacity }}

@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useCart } from "@/components/providers/CartProvider";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { getHeroPinnedProgress } from "@/lib/heroScroll";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/catalogo", label: "Catálogo" },
@@ -17,9 +20,37 @@ const NAV_LINKS = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count, openCart } = useCart();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const [hidden, setHidden] = useState(isHome);
+
+  useEffect(() => {
+    if (!isHome) {
+      // Navegación client-side fuera de la home: siempre visible.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHidden(false);
+      return;
+    }
+    function update() {
+      const progress = getHeroPinnedProgress(window.scrollY, window.innerHeight);
+      setHidden(progress < 0.9);
+    }
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [isHome]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-sage-200/70 bg-linen/85 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b border-sage-200/70 bg-linen/85 backdrop-blur-md transition-all duration-300",
+        hidden ? "pointer-events-none -translate-y-full opacity-0" : "translate-y-0 opacity-100"
+      )}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3 md:px-8">
         <Link href="/" className="flex items-center gap-2.5">
           <Logo className="h-9 w-9" />
