@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Play } from "lucide-react";
 import { HeroCTAs } from "@/components/home/HeroCTAs";
 
 const VIDEO_SRC = "/video/hero-marieta-mascotas.mp4";
@@ -17,7 +18,10 @@ export function MobileHero({ featuredImage }: { featuredImage: string | null }) 
   }
 
   function handleEnded() {
-    ctaSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = ctaSectionRef.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 90;
+    window.scrollTo({ top, behavior: "smooth" });
   }
 
   return (
@@ -45,9 +49,13 @@ export function MobileHero({ featuredImage }: { featuredImage: string | null }) 
             <h1 className="text-balance font-display text-4xl italic text-linen drop-shadow-md">
               Marieta Mascotas
             </h1>
-            <span className="mt-8 animate-pulse text-xs font-medium uppercase tracking-widest text-linen/80">
-              Tocá para comenzar
-            </span>
+
+            <div className="relative mt-10">
+              <span className="absolute inset-0 -m-2 animate-ping rounded-full bg-linen/40" />
+              <span className="relative inline-flex items-center gap-2 rounded-full bg-linen px-6 py-3 text-sm font-bold text-english-900 shadow-[0_0_35px_12px_rgba(255,255,255,0.45)]">
+                <Play className="h-4 w-4 fill-english-900" /> Tocá para comenzar
+              </span>
+            </div>
           </div>
         )}
       </section>
