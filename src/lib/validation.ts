@@ -98,3 +98,27 @@ export const jobApplicationSchema = z.object({
 });
 
 export type JobApplicationInput = z.infer<typeof jobApplicationSchema>;
+
+const phoneSchema = z
+  .string()
+  .min(6, "Ingresá un teléfono válido")
+  .max(20, "El teléfono no es válido")
+  .regex(/^[0-9+\s-]+$/, "El teléfono solo puede tener números, espacios, + y -");
+
+export const customOrderSchema = z.object({
+  ownerName: z.string().min(3, "Ingresá tu nombre completo"),
+  ownerEmail: z.string().email("Ingresá un correo válido"),
+  ownerPhone: phoneSchema,
+  petName: z.string().min(1, "Ingresá el nombre de tu mascota"),
+  petAge: z.string().min(1, "Ingresá la edad de tu mascota"),
+  petBreed: z.string().min(1, "Ingresá la raza de tu mascota"),
+  neckCm: z.number().min(5, "Medida muy chica").max(150, "Medida muy grande"),
+  chestCm: z.number().min(5, "Medida muy chica").max(150, "Medida muy grande"),
+  backLengthCm: z.number().min(5, "Medida muy chica").max(150, "Medida muy grande"),
+  eventName: z.string().optional(),
+  notes: z.string().optional(),
+  fabricMediaUrls: z.array(z.string().url()).max(5).optional(),
+  petMediaUrls: z.array(z.string().url()).max(5).optional(),
+});
+
+export type CustomOrderInput = z.infer<typeof customOrderSchema>;

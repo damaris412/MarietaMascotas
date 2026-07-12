@@ -10,9 +10,15 @@ const VIDEO_EXTENSION = /\.(mp4|webm|mov)(\?.*)?$/i;
 export function MediaUploader({
   value,
   onChange,
+  uploadUrl = "/api/admin/upload",
+  maxFiles,
+  hint = "Subí fotos o un video del producto desde tu computadora. La primera imagen es la que se usa como miniatura en el catálogo.",
 }: {
   value: string[];
   onChange: (urls: string[]) => void;
+  uploadUrl?: string;
+  maxFiles?: number;
+  hint?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,13 +26,24 @@ export function MediaUploader({
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setError(null);
+
+    let selected = Array.from(files);
+    if (maxFiles) {
+      const remaining = maxFiles - value.length;
+      if (remaining <= 0) {
+        setError(`Ya alcanzaste el máximo de ${maxFiles} archivos.`);
+        return;
+      }
+      selected = selected.slice(0, remaining);
+    }
+
     setUploading(true);
     try {
       const uploaded: string[] = [];
-      for (const file of Array.from(files)) {
+      for (const file of selected) {
         const blob = await upload(file.name, file, {
           access: "public",
-          handleUploadUrl: "/api/admin/upload",
+          handleUploadUrl: uploadUrl,
         });
         uploaded.push(blob.url);
       }
@@ -67,30 +84,29 @@ export function MediaUploader({
             </button>
           </div>
         ))}
-        <label
-          className="flex h-20 w-20 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-sage-300 text-ink/50 transition-colors hover:border-english-500 hover:text-english-700"
-        >
-          {uploading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Upload className="h-5 w-5" />
-          )}
-          <span className="text-[10px] font-medium">{uploading ? "Subiendo..." : "Subir"}</span>
-          <input
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-        </label>
+        {(!maxFiles || value.length < maxFiles) && (
+          <label
+            className="flex h-20 w-20 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-sage-300 text-ink/50 transition-colors hover:border-english-500 hover:text-english-700"
+          >
+            {uploading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Upload className="h-5 w-5" />
+            )}
+            <span className="text-[10px] font-medium">{uploading ? "Subiendo..." : "Subir"}</span>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+          </label>
+        )}
       </div>
       {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
-      <p className="mt-2 text-xs text-ink/40">
-        Subí fotos o un video del producto desde tu computadora. La primera imagen es la que se
-        usa como miniatura en el catálogo.
-      </p>
+      <p className="mt-2 text-xs text-ink/40">{hint}</p>
     </div>
   );
 }

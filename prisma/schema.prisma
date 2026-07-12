@@ -193,6 +193,35 @@ model JobApplication {
   @@index([createdAt])
 }
 
+model CustomOrderRequest {
+  id String @id @default(cuid())
+
+  ownerName  String
+  ownerEmail String
+  ownerPhone String
+
+  petName  String
+  petAge   String
+  petBreed String
+
+  neckCm       Decimal @db.Decimal(5, 1)
+  chestCm      Decimal @db.Decimal(5, 1)
+  backLengthCm Decimal @db.Decimal(5, 1)
+
+  eventName String?
+  notes     String? @db.Text
+
+  fabricMediaUrls String[]
+  petMediaUrls    String[]
+
+  contacted Boolean @default(false)
+  emailSent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
