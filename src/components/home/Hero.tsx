@@ -29,14 +29,26 @@ function ChapterText({
   title: string;
 }) {
   const [start, end] = range;
-  const hasLeadIn = start - PAD > 0;
-  // Framer Motion no acepta dos puntos de entrada iguales (rompe el cálculo de
-  // pendiente entre keyframes); si el capítulo arranca en 0 no hay fade-in, así
-  // que el array de tiempos usa solo 2 puntos (fade-out) en vez de 4 con duplicado.
-  const times = hasLeadIn ? [start - PAD, start, end, end + PAD] : [end, end + PAD];
-  const values = hasLeadIn ? [0, 1, 1, 0] : [1, 0];
-  const opacity = useTransform(scrollYProgress, times, values);
-  const y = useTransform(scrollYProgress, [start, end], [24, -24]);
+  const [active, setActive] = useState(start <= 0);
+
+  // Además del fade con opacity, el capítulo se saca directamente del DOM fuera
+  // de su rango: así, esté o no perfectamente clampeada la opacidad, es
+  // imposible que quede una imagen fantasma superpuesta al resto del hero.
+  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+    setActive(progress > start - PAD && progress < end + PAD);
+  });
+
+  const opacity = useTransform(scrollYProgress, (progress) => {
+    if (progress < start) return Math.max(0, Math.min(1, (progress - (start - PAD)) / PAD));
+    if (progress > end) return Math.max(0, Math.min(1, 1 - (progress - end) / PAD));
+    return 1;
+  });
+  const y = useTransform(scrollYProgress, (progress) => {
+    const clamped = Math.max(start, Math.min(end, progress));
+    return 24 - 48 * ((clamped - start) / Math.max(end - start, 0.0001));
+  });
+
+  if (!active) return null;
 
   return (
     <motion.div
@@ -59,6 +71,7 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ctaVisible, setCtaVisible] = useState(false);
+  const [hintVisible, setHintVisible] = useState(true);
   const targetProgressRef = useRef(0);
 
   const { scrollYProgress } = useScroll({
@@ -69,6 +82,7 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     targetProgressRef.current = progress;
     setCtaVisible(progress >= CTA_START + 0.02);
+    setHintVisible(progress < 0.05);
   });
 
   // Interpola el currentTime del video hacia el progreso de scroll en cada frame,
@@ -95,11 +109,15 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
-  const ctaOpacity = useTransform(scrollYProgress, [CTA_START, CTA_VISIBLE], [0, 1]);
+  const scrollHintOpacity = useTransform(scrollYProgress, (progress) =>
+    Math.max(0, Math.min(1, 1 - progress / 0.05))
+  );
+  const ctaOpacity = useTransform(scrollYProgress, (progress) =>
+    Math.max(0, Math.min(1, (progress - CTA_START) / (CTA_VISIBLE - CTA_START)))
+  );
 
   return (
-    <section ref={containerRef} className="relative h-[700vh]">
+    <section ref={containerRef} className="relative h-[800vh]">
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-english-900">
         <video
           ref={videoRef}
@@ -125,12 +143,14 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
           <HeroCTAs featuredImage={featuredImage} />
         </motion.div>
 
-        <motion.div
-          style={{ opacity: scrollHintOpacity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest text-linen/70"
-        >
-          Desliza para descubrir
-        </motion.div>
+        {hintVisible && (
+          <motion.div
+            style={{ opacity: scrollHintOpacity }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs font-medium uppercase tracking-widest text-linen/70"
+          >
+            Desliza para descubrir
+          </motion.div>
+        )}
       </div>
     </section>
   );
