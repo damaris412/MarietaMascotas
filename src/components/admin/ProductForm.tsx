@@ -34,6 +34,8 @@ export function ProductForm({
     defaultValues: { category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false },
   });
 
+  const [imagesText, setImagesText] = useState("");
+
   useEffect(() => {
     if (product) {
       reset({
@@ -46,8 +48,13 @@ export function ProductForm({
         sizes: product.sizes,
         featured: product.featured,
       });
+      // Sincroniza el textarea de imágenes (fuera de react-hook-form) con el
+      // producto seleccionado para editar, igual que "reset" arriba.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setImagesText(product.images.join("\n"));
     } else {
       reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
+      setImagesText("");
     }
   }, [product, reset]);
 
@@ -55,17 +62,22 @@ export function ProductForm({
     setServerError(null);
     setLoading(true);
     try {
+      const images = imagesText
+        .split("\n")
+        .map((url) => url.trim())
+        .filter(Boolean);
       const res = await fetch(
         isEditing ? `/api/admin/products/${product.id}` : "/api/admin/products",
         {
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, images }),
         }
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo guardar el producto.");
       reset({ category: "ROPA", sizes: ["S", "M", "L"], stock: 10, featured: false });
+      setImagesText("");
       onDone?.();
       router.refresh();
     } catch (error) {
@@ -171,6 +183,23 @@ export function ProductForm({
         />
       </div>
 
+      <div className="md:col-span-2">
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">
+          Imágenes (una URL por línea)
+        </label>
+        <textarea
+          value={imagesText}
+          onChange={(e) => setImagesText(e.target.value)}
+          rows={3}
+          className={inputClass}
+          placeholder="/images/productos/mi-producto.png"
+        />
+        <p className="mt-1 text-xs text-ink/40">
+          Pegá la ruta o URL de cada foto del producto, una por línea. La primera es la que se
+          usa como miniatura.
+        </p>
+      </div>
+
       <label className="flex items-center gap-2 text-sm text-ink/70 md:col-span-2">
         <input type="checkbox" {...register("featured")} className="h-4 w-4 accent-english-700" />
         Mostrar en destacados de la portada
@@ -183,7 +212,7 @@ export function ProductForm({
       <button
         type="submit"
         disabled={loading}
-        className="rounded-full bg-english-700 py-3 text-sm font-semibold text-linen hover:bg-english-800 disabled:opacity-50 md:col-span-2"
+        className="rounded-full bg-english-700 py-3 text-sm font-semibold text-linen transition-all hover:-translate-y-0.5 hover:bg-english-800 hover:shadow-lg hover:shadow-english-800/30 disabled:opacity-50 md:col-span-2"
       >
         {loading ? "Guardando..." : isEditing ? "Guardar cambios" : "Crear producto"}
       </button>

@@ -59,7 +59,7 @@ export function Hero() {
             Estilo y confort para quien más lo merece
           </h1>
           <p className="mt-5 text-balance text-base text-ink/70 md:text-lg">
-            Diseñamos abrigos y camas ortopédicas de alta gama para perros y gatos: materiales
+            Diseñamos abrigos y camas premium de alta gama para perros y gatos: materiales
             nobles, siluetas cuidadas y el mismo mimo que le das tú.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
@@ -70,10 +70,10 @@ export function Hero() {
               Ver catálogo
             </Link>
             <Link
-              href="/catalogo?express=1"
+              href="/nosotros"
               className="rounded-full border border-sage-400 bg-white/60 px-7 py-3.5 text-center text-sm font-semibold text-english-800 backdrop-blur transition-transform hover:-translate-y-0.5 hover:bg-white"
             >
-              ⚡ Compra Express
+              Conocé la marca
             </Link>
           </div>
         </motion.div>

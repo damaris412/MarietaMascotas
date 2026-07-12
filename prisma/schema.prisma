@@ -131,13 +131,15 @@ model Order {
   guestEmail   String?
   guestDni     String?
   guestAddress String?
+  guestPhone   String?
 
   locality Locality?
 
-  status        PaymentStatus @default(PENDING)
-  paymentMethod PaymentMethod?
-  shippingCost  Decimal       @db.Decimal(10, 2) @default(0)
-  total         Decimal       @db.Decimal(10, 2)
+  status            PaymentStatus  @default(PENDING)
+  paymentMethod     PaymentMethod?
+  shippingCost      Decimal        @db.Decimal(10, 2) @default(0)
+  total             Decimal        @db.Decimal(10, 2)
+  whatsappContacted Boolean        @default(false)
 
   mpPreferenceId String?
   mpPaymentId    String?
@@ -149,6 +151,39 @@ model Order {
   paidAt    DateTime?
 
   @@index([status])
+  @@index([createdAt])
+}
+
+model StoreSettings {
+  id                     String   @id @default("singleton")
+  shippingCost           Decimal  @db.Decimal(10, 2) @default(15000)
+  freeShippingThreshold  Decimal  @db.Decimal(10, 2) @default(250000)
+  updatedAt              DateTime @updatedAt
+}
+
+enum ApplicationArea {
+  MARKETING
+  CATALOGO_FOTOS
+  IMAGENES_IA
+  FLETE_ENVIOS
+  COLABORACIONES
+  EVENTOS
+  PACKAGING
+  OTRO
+}
+
+model JobApplication {
+  id      String           @id @default(cuid())
+  name    String
+  email   String
+  phone   String
+  area    ApplicationArea
+  message String           @db.Text
+
+  emailSent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
   @@index([createdAt])
 }
 

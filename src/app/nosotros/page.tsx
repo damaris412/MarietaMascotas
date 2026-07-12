@@ -4,7 +4,7 @@ export default function NosotrosPage() {
       <h1 className="font-display text-3xl italic text-english-900">Nuestra historia</h1>
       <p className="mt-5 text-ink/70 leading-relaxed">
         Marieta Mascotas nació de una idea sencilla: nuestras mascotas merecen el mismo cuidado
-        y estilo que le dedicamos a nuestro propio hogar. Diseñamos abrigos y camas ortopédicas
+        y estilo que le dedicamos a nuestro propio hogar. Diseñamos abrigos y camas premium
         con materiales nobles, pensadas para el clima y el descanso de cada raza.
       </p>
       <p className="mt-4 text-ink/70 leading-relaxed">

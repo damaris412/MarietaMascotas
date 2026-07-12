@@ -1,6 +1,10 @@
-export const FLAT_SHIPPING_COST = 15000;
-export const FREE_SHIPPING_THRESHOLD = 250000;
+export const DEFAULT_SHIPPING_SETTINGS = {
+  shippingCost: 15000,
+  freeShippingThreshold: 250000,
+};
 
-export function calculateShippingCost(subtotal: number) {
-  return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING_COST;
+export type ShippingSettings = typeof DEFAULT_SHIPPING_SETTINGS;
+
+export function calculateShippingCost(subtotal: number, settings: ShippingSettings) {
+  return subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingCost;
 }

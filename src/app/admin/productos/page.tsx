@@ -1,10 +1,10 @@
-import { getProducts } from "@/server/services/products";
+import { getAllProductsForAdmin } from "@/server/services/products";
 import { ProductsManager } from "@/components/admin/ProductsManager";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const products = await getProducts();
+  const products = await getAllProductsForAdmin();
 
   return (
     <div className="space-y-6">

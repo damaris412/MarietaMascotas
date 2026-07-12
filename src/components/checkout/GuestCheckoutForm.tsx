@@ -28,6 +28,7 @@ export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null
       setValue("name", session.user.name ?? "");
       setValue("email", session.user.email ?? "");
       if (session.user.address) setValue("address", session.user.address);
+      if (session.user.phone) setValue("phone", session.user.phone);
     }
   }, [session, setValue]);
 
@@ -140,6 +141,18 @@ export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null
             placeholder="Ej. 1032456789"
           />
           {errors.dni && <p className="mt-1 text-xs text-red-500">{errors.dni.message}</p>}
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink/60">
+            Teléfono
+          </label>
+          <input
+            {...register("phone")}
+            className={inputClass(!!errors.phone)}
+            placeholder="Ej. 3534290975"
+          />
+          {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
         </div>
 
         <div>
