@@ -23,6 +23,7 @@ export function Footer() {
             <li><Link href="/catalogo?categoria=ropa" className="hover:text-linen">Ropa</Link></li>
             <li><Link href="/catalogo?categoria=camas" className="hover:text-linen">Camas</Link></li>
             <li><Link href="/catalogo" className="hover:text-linen">Todo el catálogo</Link></li>
+            <li><Link href="/sastreria-a-medida" className="hover:text-linen">Sastrería a medida</Link></li>
           </ul>
         </div>
 

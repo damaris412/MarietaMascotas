@@ -64,3 +64,68 @@ export function ownerNotificationEmail(data: {
     </div>
   </div>`;
 }
+
+export function customOrderConfirmationEmail(ownerName: string, petName: string) {
+  return `
+  <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf6ee; padding:32px;">
+    <div style="max-width:480px; margin:0 auto; background:#ffffff; border-radius:24px; overflow:hidden; border:1px solid #d3e0c3;">
+      <div style="background:#26402f; padding:28px 32px;">
+        <p style="margin:0; color:#faf6ee; font-size:20px; font-style:italic;">Marieta Mascotas</p>
+      </div>
+      <div style="padding:32px; color:#2b2a25;">
+        <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${ownerName}!</h1>
+        <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
+          Recibimos tu pedido de prenda a medida para ${petName}. Vamos a revisar las medidas y
+          las referencias que nos enviaste, y te vamos a contactar a la brevedad para avanzar con
+          el diseño.
+        </p>
+        <p style="font-size:14px; line-height:1.6; color:#4a4a44; margin-top:24px;">
+          ¡Gracias por confiar en nosotros! 🐾
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+
+export function customOrderNotificationEmail(data: {
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  petName: string;
+  petAge: string;
+  petBreed: string;
+  neckCm: number;
+  chestCm: number;
+  backLengthCm: number;
+  eventName?: string;
+  notes?: string;
+  fabricMediaUrls: string[];
+  petMediaUrls: string[];
+}) {
+  const mediaLinks = (urls: string[]) =>
+    urls.length
+      ? urls.map((url, i) => `<a href="${url}" style="display:block;">Archivo ${i + 1}</a>`).join("")
+      : "<span>—</span>";
+
+  return `
+  <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf6ee; padding:32px;">
+    <div style="max-width:520px; margin:0 auto; background:#ffffff; border-radius:24px; overflow:hidden; border:1px solid #d3e0c3;">
+      <div style="background:#26402f; padding:24px 32px;">
+        <p style="margin:0; color:#faf6ee; font-size:18px; font-style:italic;">Nuevo pedido de sastrería a medida</p>
+      </div>
+      <div style="padding:28px 32px; color:#2b2a25; font-size:14px; line-height:1.7;">
+        <p><strong>Dueño:</strong> ${data.ownerName}</p>
+        <p><strong>Correo:</strong> ${data.ownerEmail}</p>
+        <p><strong>Teléfono:</strong> ${data.ownerPhone}</p>
+        <p><strong>Mascota:</strong> ${data.petName} — ${data.petBreed}, ${data.petAge}</p>
+        <p><strong>Medidas:</strong> cuello ${data.neckCm}cm · tórax ${data.chestCm}cm · lomo ${data.backLengthCm}cm</p>
+        ${data.eventName ? `<p><strong>Evento:</strong> ${data.eventName}</p>` : ""}
+        ${data.notes ? `<p><strong>Comentarios:</strong></p><p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${data.notes}</p>` : ""}
+        <p><strong>Referencias de tela:</strong></p>
+        <div style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${mediaLinks(data.fabricMediaUrls)}</div>
+        <p style="margin-top:12px;"><strong>Fotos/videos de la mascota:</strong></p>
+        <div style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${mediaLinks(data.petMediaUrls)}</div>
+      </div>
+    </div>
+  </div>`;
+}
