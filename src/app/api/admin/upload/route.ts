@@ -32,6 +32,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(jsonResponse);
   } catch (error) {
+    console.error("[admin/upload] token env present:", Boolean(process.env.BLOB_READ_WRITE_TOKEN));
+    console.error("[admin/upload] error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "No se pudo subir el archivo." },
       { status: 400 }
