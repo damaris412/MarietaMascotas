@@ -31,6 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       stock: data.stock,
       sizes: data.sizes,
       featured: data.featured ?? false,
+      images: data.images ?? [],
     },
   });
 

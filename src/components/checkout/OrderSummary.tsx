@@ -1,12 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/providers/CartProvider";
 import { formatCurrency } from "@/lib/utils";
-import { calculateShippingCost, FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
+import { calculateShippingCost, DEFAULT_SHIPPING_SETTINGS, type ShippingSettings } from "@/lib/shipping";
 
 export function OrderSummary() {
   const { items, subtotal } = useCart();
-  const shippingCost = calculateShippingCost(subtotal);
+  const [settings, setSettings] = useState<ShippingSettings>(DEFAULT_SHIPPING_SETTINGS);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setSettings(data);
+      })
+      .catch(() => {
+        // Si falla, seguimos mostrando el valor por defecto local.
+      });
+  }, []);
+
+  const shippingCost = calculateShippingCost(subtotal, settings);
 
   return (
     <div className="rounded-3xl border border-sage-200/70 bg-white/70 p-6">
@@ -38,7 +52,7 @@ export function OrderSummary() {
         </div>
         {shippingCost > 0 && (
           <p className="text-xs text-sage-600">
-            Envío gratis en pedidos desde {formatCurrency(FREE_SHIPPING_THRESHOLD)}
+            Envío gratis en pedidos desde {formatCurrency(settings.freeShippingThreshold)}
           </p>
         )}
         <div className="flex justify-between border-t border-sage-200 pt-2 text-base font-semibold text-english-900">

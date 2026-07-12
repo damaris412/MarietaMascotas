@@ -17,6 +17,11 @@ export const guestDetailsSchema = z.object({
     .min(5, "El DNI debe tener al menos 5 dígitos")
     .max(15, "El DNI no es válido")
     .regex(/^[0-9A-Za-z-]+$/, "El DNI solo puede tener números y letras"),
+  phone: z
+    .string()
+    .min(6, "Ingresa un teléfono válido")
+    .max(20, "El teléfono no es válido")
+    .regex(/^[0-9+\s-]+$/, "El teléfono solo puede tener números, espacios, + y -"),
   address: z.string().min(10, "Ingresa la dirección completa de envío"),
 });
 
@@ -50,6 +55,39 @@ export const productSchema = z.object({
   stock: z.number().int().min(0),
   sizes: z.array(z.enum(["S", "M", "L"])),
   featured: z.boolean().optional(),
+  images: z.array(z.string().min(1)).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
+
+export const storeSettingsSchema = z.object({
+  shippingCost: z.number().min(0, "El costo de envío no puede ser negativo"),
+  freeShippingThreshold: z.number().min(0, "El umbral no puede ser negativo"),
+});
+
+export type StoreSettingsInput = z.infer<typeof storeSettingsSchema>;
+
+export const applicationAreaSchema = z.enum([
+  "MARKETING",
+  "CATALOGO_FOTOS",
+  "IMAGENES_IA",
+  "FLETE_ENVIOS",
+  "COLABORACIONES",
+  "EVENTOS",
+  "PACKAGING",
+  "OTRO",
+]);
+
+export const jobApplicationSchema = z.object({
+  name: z.string().min(3, "Ingresá tu nombre completo"),
+  email: z.string().email("Ingresá un correo válido"),
+  phone: z
+    .string()
+    .min(6, "Ingresá un teléfono válido")
+    .max(20, "El teléfono no es válido")
+    .regex(/^[0-9+\s-]+$/, "El teléfono solo puede tener números, espacios, + y -"),
+  area: applicationAreaSchema,
+  message: z.string().min(10, "Contanos un poco más (mínimo 10 caracteres)"),
+});
+
+export type JobApplicationInput = z.infer<typeof jobApplicationSchema>;

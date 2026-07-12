@@ -83,7 +83,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           },
         ];
       });
-      setIsOpen(true);
     },
     []
   );

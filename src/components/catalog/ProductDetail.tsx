@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Minus, PawPrint, Plus } from "lucide-react";
+import { Check, Minus, PawPrint, Plus } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { useCart } from "@/components/providers/CartProvider";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -13,8 +12,16 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
   const [size, setSize] = useState<ProductSize | null>(product.sizes[0] ?? null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [added, setAdded] = useState(false);
   const { addItem } = useCart();
-  const router = useRouter();
+  const outOfStock = product.stock <= 0;
+
+  function handleAdd() {
+    if (outOfStock) return;
+    addItem(product, size, quantity);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1200);
+  }
 
   const discount =
     product.previousPrice && product.previousPrice > product.price
@@ -105,39 +112,46 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
           </div>
         )}
 
-        <div className="mt-6 flex items-center gap-2 rounded-full border border-sage-300 px-2 py-1.5 w-fit">
-          <button
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="flex h-7 w-7 items-center justify-center text-english-700"
-            aria-label="Restar"
-          >
-            <Minus className="h-4 w-4" />
-          </button>
-          <span className="w-6 text-center text-sm font-medium">{quantity}</span>
-          <button
-            onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-            className="flex h-7 w-7 items-center justify-center text-english-700"
-            aria-label="Sumar"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
+        {!outOfStock && (
+          <div className="mt-6 flex items-center gap-2 rounded-full border border-sage-300 px-2 py-1.5 w-fit">
+            <button
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="flex h-7 w-7 items-center justify-center text-english-700"
+              aria-label="Restar"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="w-6 text-center text-sm font-medium">{quantity}</span>
+            <button
+              onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+              className="flex h-7 w-7 items-center justify-center text-english-700"
+              aria-label="Sumar"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-8">
           <button
-            onClick={() => addItem(product, size, quantity)}
-            className="flex-1 rounded-full border border-english-700 py-3.5 text-sm font-semibold text-english-800 transition-colors hover:bg-sage-100"
+            onClick={handleAdd}
+            disabled={outOfStock}
+            className={cn(
+              "w-full rounded-full py-3.5 text-sm font-semibold shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none",
+              added
+                ? "bg-sage-500 text-linen"
+                : "bg-english-700 text-linen hover:-translate-y-0.5 hover:bg-english-800 hover:shadow-lg hover:shadow-english-800/30 active:translate-y-0"
+            )}
           >
-            Añadir al carrito
-          </button>
-          <button
-            onClick={() => {
-              addItem(product, size, quantity);
-              router.push("/checkout");
-            }}
-            className="flex-1 rounded-full bg-english-700 py-3.5 text-sm font-semibold text-linen transition-colors hover:bg-english-800"
-          >
-            ⚡ Compra Express
+            {outOfStock ? (
+              "Sin stock"
+            ) : added ? (
+              <span className="flex items-center justify-center gap-2">
+                <Check className="h-4 w-4" /> Añadido al carrito
+              </span>
+            ) : (
+              "Añadir al carrito"
+            )}
           </button>
         </div>
 

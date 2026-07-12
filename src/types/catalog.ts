@@ -15,6 +15,7 @@ export type ProductDTO = {
   rating: number;
   reviewCount: number;
   featured: boolean;
+  active: boolean;
 };
 
 export type CartItem = {

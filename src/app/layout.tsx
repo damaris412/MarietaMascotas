@@ -22,7 +22,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Marieta Mascotas | Ropa y camas premium para mascotas",
   description:
-    "Ropa de diseño y camas ortopédicas premium para perros y gatos. Envíos a todo el país, pago seguro con Mercado Pago.",
+    "Ropa de diseño y camas premium para perros y gatos. Envíos a Villa María y Villa Nueva.",
 };
 
 export default function RootLayout({

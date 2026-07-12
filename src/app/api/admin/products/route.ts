@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       stock: data.stock,
       sizes: data.sizes,
       featured: data.featured ?? false,
-      images: [],
+      images: data.images ?? [],
     },
   });
 

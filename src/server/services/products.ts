@@ -23,6 +23,7 @@ function toDTO(product: {
   rating: number;
   reviewCount: number;
   featured: boolean;
+  active: boolean;
 }): ProductDTO {
   return {
     ...product,
@@ -58,6 +59,11 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductDTO[]> {
     orderBy: { createdAt: "desc" },
     take: limit,
   });
+  return products.map(toDTO);
+}
+
+export async function getAllProductsForAdmin(): Promise<ProductDTO[]> {
+  const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
   return products.map(toDTO);
 }
 

@@ -4,6 +4,7 @@ import { prisma } from "@/server/db/prisma";
 import { createCheckoutPreference } from "@/server/payments/mercadopago";
 import { checkoutRequestSchema } from "@/lib/validation";
 import { calculateShippingCost } from "@/lib/shipping";
+import { getStoreSettings } from "@/server/services/settings";
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +63,8 @@ export async function POST(req: NextRequest) {
     });
 
     const subtotal = orderItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const shippingCost = calculateShippingCost(subtotal);
+    const shippingSettings = await getStoreSettings();
+    const shippingCost = calculateShippingCost(subtotal, shippingSettings);
     const total = subtotal + shippingCost;
 
     const order = await prisma.order.create({
@@ -72,6 +74,7 @@ export async function POST(req: NextRequest) {
         guestEmail: guest?.email,
         guestDni: guest?.dni,
         guestAddress: guest?.address,
+        guestPhone: guest?.phone,
         locality,
         shippingCost,
         total,

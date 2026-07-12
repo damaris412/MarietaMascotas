@@ -48,6 +48,12 @@ export async function createCheckoutPreference({
     });
   }
 
+  // Mercado Pago exige que back_urls.success sea una URL públicamente
+  // alcanzable cuando se usa auto_return; en desarrollo local (localhost) la
+  // rechaza con "invalid_auto_return", así que solo lo activamos si el sitio
+  // tiene una URL pública real (producción).
+  const isPubliclyReachable = !siteUrl.includes("localhost") && !siteUrl.includes("127.0.0.1");
+
   const response = await mpPreference.create({
     body: {
       items: preferenceItems,
@@ -58,7 +64,7 @@ export async function createCheckoutPreference({
         failure: `${siteUrl}/checkout/failure`,
         pending: `${siteUrl}/checkout/pending`,
       },
-      auto_return: "approved",
+      ...(isPubliclyReachable ? { auto_return: "approved" as const } : {}),
       notification_url: `${siteUrl}/api/webhooks/mercado-pago`,
       statement_descriptor: "MARIETA MASCOTAS",
       // No excluimos ningún medio de pago: al no listar nada en

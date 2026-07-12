@@ -11,8 +11,7 @@ export function Footer() {
             <span className="font-display text-lg italic">Marieta Mascotas</span>
           </div>
           <p className="max-w-xs text-sm text-linen/70">
-            Ropa de diseño y camas ortopédicas premium para que tu mascota viva con estilo y
-            confort.
+            Ropa de diseño y camas premium para que tu mascota viva con estilo y confort.
           </p>
         </div>
 
@@ -40,11 +39,11 @@ export function Footer() {
 
         <div>
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-sage-300">
-            Pagos seguros
+            Sumate
           </h3>
-          <p className="text-sm text-linen/70">
-            Tarjetas de crédito/débito, PSE y efectivo a través de Mercado Pago.
-          </p>
+          <ul className="space-y-2.5 text-sm text-linen/80">
+            <li><Link href="/trabaja-con-nosotros" className="hover:text-linen">Trabajá con nosotros</Link></li>
+          </ul>
         </div>
       </div>
       <div className="border-t border-linen/10 px-5 py-5 text-center text-xs text-linen/50 md:px-8">
