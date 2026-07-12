@@ -30,8 +30,11 @@ function ChapterText({
 }) {
   const [start, end] = range;
   const hasLeadIn = start - PAD > 0;
-  const times = hasLeadIn ? [start - PAD, start, end, end + PAD] : [start, start, end, end + PAD];
-  const values = hasLeadIn ? [0, 1, 1, 0] : [1, 1, 1, 0];
+  // Framer Motion no acepta dos puntos de entrada iguales (rompe el cálculo de
+  // pendiente entre keyframes); si el capítulo arranca en 0 no hay fade-in, así
+  // que el array de tiempos usa solo 2 puntos (fade-out) en vez de 4 con duplicado.
+  const times = hasLeadIn ? [start - PAD, start, end, end + PAD] : [end, end + PAD];
+  const values = hasLeadIn ? [0, 1, 1, 0] : [1, 0];
   const opacity = useTransform(scrollYProgress, times, values);
   const y = useTransform(scrollYProgress, [start, end], [24, -24]);
 
@@ -55,7 +58,6 @@ function ChapterText({
 export function Hero({ featuredImage }: { featuredImage: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [duration, setDuration] = useState(0);
   const [ctaVisible, setCtaVisible] = useState(false);
   const targetProgressRef = useRef(0);
 
@@ -63,11 +65,6 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
     target: containerRef,
     offset: ["start start", "end end"],
   });
-
-  function captureDuration(e: React.SyntheticEvent<HTMLVideoElement>) {
-    const value = e.currentTarget.duration;
-    if (Number.isFinite(value) && value > 0) setDuration(value);
-  }
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     targetProgressRef.current = progress;
@@ -77,13 +74,16 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
   // Interpola el currentTime del video hacia el progreso de scroll en cada frame,
   // en vez de "saltar" directo: si se scrollea rápido, hace un fast-forward suave
   // por los cuadros intermedios en lugar de cortar directo a la escena final.
+  // Lee video.duration directo en cada frame (no vía estado de React) para no
+  // depender de que loadedmetadata/durationchange disparen a tiempo: el loop
+  // arranca apenas se monta y no hace nada hasta que el video esté listo.
   useEffect(() => {
-    if (!duration) return;
     let frameId: number;
     function tick() {
       const video = videoRef.current;
-      if (video) {
-        const target = Math.min(targetProgressRef.current * duration, duration - 0.05);
+      const duration = video?.duration;
+      if (video && Number.isFinite(duration) && duration! > 0) {
+        const target = Math.min(targetProgressRef.current * duration!, duration! - 0.05);
         const diff = target - video.currentTime;
         if (Math.abs(diff) > 0.01) {
           video.currentTime = video.currentTime + diff * 0.15;
@@ -93,7 +93,7 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
     }
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [duration]);
+  }, []);
 
   const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
   const ctaOpacity = useTransform(scrollYProgress, [CTA_START, CTA_VISIBLE], [0, 1]);
@@ -107,8 +107,6 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
           muted
           playsInline
           preload="auto"
-          onLoadedMetadata={captureDuration}
-          onDurationChange={captureDuration}
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-black/25" />
