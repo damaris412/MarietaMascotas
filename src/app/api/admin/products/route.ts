@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       sizes: data.sizes,
       featured: data.featured ?? false,
       images: data.images ?? [],
+      imageFocalPoints: data.imageFocalPoints ?? undefined,
     },
   });
 

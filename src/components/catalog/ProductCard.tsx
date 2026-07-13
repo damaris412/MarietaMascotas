@@ -20,6 +20,9 @@ export function ProductCard({ product }: { product: ProductDTO }) {
       ? Math.round(100 - (product.price / product.previousPrice) * 100)
       : null;
 
+  const focalPoint = product.images[0] ? product.imageFocalPoints?.[product.images[0]] : null;
+  const objectPosition = focalPoint ? `${focalPoint.x}% ${focalPoint.y}%` : undefined;
+
   function handleAdd() {
     if (outOfStock) return;
     addItem(product, size, 1);
@@ -36,6 +39,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
             alt={product.title}
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+            style={objectPosition ? { objectPosition } : undefined}
             className={cn(
               "object-cover md:transition-transform md:duration-500 md:group-hover:scale-105",
               outOfStock && "grayscale-[35%]"

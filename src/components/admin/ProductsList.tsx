@@ -139,7 +139,19 @@ export function ProductsList({
                     title="Ver publicación en grande"
                   >
                     {product.images[0] ? (
-                      <Image src={product.images[0]} alt={product.title} fill className="object-cover" />
+                      <Image
+                        src={product.images[0]}
+                        alt={product.title}
+                        fill
+                        style={
+                          product.imageFocalPoints?.[product.images[0]]
+                            ? {
+                                objectPosition: `${product.imageFocalPoints[product.images[0]].x}% ${product.imageFocalPoints[product.images[0]].y}%`,
+                              }
+                            : undefined
+                        }
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
                         <PawPrint className="h-6 w-6 text-sage-400/60" />

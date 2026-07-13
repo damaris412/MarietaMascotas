@@ -4,11 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X } from "lucide-react";
+import Image from "next/image";
+import { Move, Plus, X } from "lucide-react";
 import { productSchema, type ProductInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import { MediaUploader } from "@/components/admin/MediaUploader";
-import type { CategoryDTO, ProductDTO } from "@/types/catalog";
+import { ImagePositionPicker } from "@/components/admin/ImagePositionPicker";
+import type { CategoryDTO, FocalPoint, ProductDTO } from "@/types/catalog";
+
+const VIDEO_EXTENSION = /\.(mp4|webm|mov)(\?.*)?$/i;
 
 const SIZE_OPTIONS = ["S", "M", "L"] as const;
 
@@ -60,6 +64,8 @@ export function ProductForm({
   }, []);
 
   const [imagesText, setImagesText] = useState<string[]>([]);
+  const [imageFocalPoints, setImageFocalPoints] = useState<Record<string, FocalPoint>>({});
+  const [adjustingUrl, setAdjustingUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (product) {
@@ -78,9 +84,11 @@ export function ProductForm({
       // seleccionado para editar, igual que "reset" arriba.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setImagesText(product.images);
+      setImageFocalPoints(product.imageFocalPoints ?? {});
     } else {
       reset({ sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] });
       setImagesText([]);
+      setImageFocalPoints({});
     }
   }, [product, reset]);
 
@@ -112,13 +120,14 @@ export function ProductForm({
         {
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, images: imagesText }),
+          body: JSON.stringify({ ...data, images: imagesText, imageFocalPoints }),
         }
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo guardar el producto.");
       reset({ sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] });
       setImagesText([]);
+      setImageFocalPoints({});
       onDone?.();
       router.refresh();
     } catch (error) {
@@ -274,7 +283,50 @@ export function ProductForm({
           Fotos / video del producto
         </label>
         <MediaUploader value={imagesText} onChange={setImagesText} />
+
+        {imagesText.filter((url) => !VIDEO_EXTENSION.test(url)).length > 0 && (
+          <div className="mt-3">
+            <p className="mb-2 text-xs text-ink/40">
+              Ajustá cómo se recorta cada foto en las tarjetas cuadradas del catálogo:
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {imagesText
+                .filter((url) => !VIDEO_EXTENSION.test(url))
+                .map((url) => {
+                  const point = imageFocalPoints[url] ?? { x: 50, y: 50 };
+                  return (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={() => setAdjustingUrl(url)}
+                      className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-sage-200"
+                    >
+                      <Image
+                        src={url}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        style={{ objectPosition: `${point.x}% ${point.y}%` }}
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
+                        <Move className="h-4 w-4 text-white" />
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        )}
       </div>
+
+      {adjustingUrl && (
+        <ImagePositionPicker
+          imageUrl={adjustingUrl}
+          value={imageFocalPoints[adjustingUrl] ?? { x: 50, y: 50 }}
+          onChange={(pos) => setImageFocalPoints((prev) => ({ ...prev, [adjustingUrl]: pos }))}
+          onClose={() => setAdjustingUrl(null)}
+        />
+      )}
 
       <label className="flex items-center gap-2 text-sm text-ink/70 md:col-span-2">
         <input type="checkbox" {...register("featured")} className="h-4 w-4 accent-english-700" />
