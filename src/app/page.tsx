@@ -10,7 +10,7 @@ export default async function Home() {
 
   return (
     <>
-      <Hero featuredImage={featured[0]?.images[0] ?? null} />
+      <Hero />
 
       <section className="mx-auto max-w-7xl px-5 py-16 md:px-8">
         <div className="mb-8 flex items-end justify-between">

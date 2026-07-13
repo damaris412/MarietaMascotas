@@ -10,6 +10,7 @@ import { productSchema, type ProductInput } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 import { ImagePositionPicker } from "@/components/admin/ImagePositionPicker";
+import { useToast } from "@/components/providers/ToastProvider";
 import type { CategoryDTO, FocalPoint, ProductDTO } from "@/types/catalog";
 
 const VIDEO_EXTENSION = /\.(mp4|webm|mov)(\?.*)?$/i;
@@ -24,6 +25,7 @@ export function ProductForm({
   onDone?: () => void;
 }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const isEditing = !!product;
@@ -114,6 +116,7 @@ export function ProductForm({
   async function onSubmit(data: ProductInput) {
     setServerError(null);
     setLoading(true);
+    showToast(isEditing ? "Guardando cambios..." : "Subiendo producto...", "loading");
     try {
       const res = await fetch(
         isEditing ? `/api/admin/products/${product.id}` : "/api/admin/products",
@@ -125,13 +128,16 @@ export function ProductForm({
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo guardar el producto.");
+      showToast(isEditing ? "Producto editado" : "Producto subido", "success");
       reset({ sizes: ["S", "M", "L"], stock: 10, featured: false, images: [] });
       setImagesText([]);
       setImageFocalPoints({});
       onDone?.();
       router.refresh();
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : "Ocurrió un error inesperado.");
+      const message = error instanceof Error ? error.message : "Ocurrió un error inesperado.";
+      showToast(message, "error", 3000);
+      setServerError(message);
     } finally {
       setLoading(false);
     }

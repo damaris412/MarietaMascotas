@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Check, PawPrint, Plus } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { useCart } from "@/components/providers/CartProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { ProductDTO, ProductSize } from "@/types/catalog";
 
@@ -13,6 +14,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
   const [size, setSize] = useState<ProductSize | null>(product.sizes[0] ?? null);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { showToast } = useToast();
   const outOfStock = product.stock <= 0;
 
   const discount =
@@ -27,6 +29,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
     if (outOfStock) return;
     addItem(product, size, 1);
     setAdded(true);
+    showToast("Producto agregado al carrito", "success");
     setTimeout(() => setAdded(false), 1200);
   }
 
