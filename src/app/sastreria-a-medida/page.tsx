@@ -49,15 +49,33 @@ export default function SastreriaAMedidaPage() {
           Para prendas a medida no usamos talles S, M, L — solo estas 3 medidas, en centímetros.
         </p>
 
-        <div className="mt-8 grid gap-8 sm:grid-cols-3">
+        <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-8">
           {MEASUREMENTS.map((m) => (
             <div key={m.key} className="text-center">
-              <div className="relative mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-2xl bg-white">
-                <Image src={m.image} alt={m.title} fill sizes="220px" className="object-contain" />
+              <div className="mx-auto w-full max-w-[220px] overflow-hidden rounded-2xl">
+                <Image
+                  src={m.image}
+                  alt={m.title}
+                  width={1000}
+                  height={800}
+                  sizes="(min-width: 640px) 220px, 33vw"
+                  className="h-auto w-full object-cover"
+                />
               </div>
-              <h3 className="mt-4 text-sm font-semibold text-english-900">{m.title}</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-ink/60">{m.description}</p>
+              <h3 className="mt-3 text-xs font-semibold text-english-900 sm:mt-4 sm:text-sm">
+                {m.title}
+              </h3>
+              <p className="mt-1.5 hidden text-xs leading-relaxed text-ink/60 sm:block">
+                {m.description}
+              </p>
             </div>
+          ))}
+        </div>
+        <div className="mt-6 space-y-2 sm:hidden">
+          {MEASUREMENTS.map((m) => (
+            <p key={m.key} className="text-xs leading-relaxed text-ink/60">
+              <span className="font-semibold text-english-900">{m.title}:</span> {m.description}
+            </p>
           ))}
         </div>
       </div>

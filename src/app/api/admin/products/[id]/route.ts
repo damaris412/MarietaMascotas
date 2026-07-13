@@ -45,6 +45,16 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
 
   const { id } = await params;
-  await prisma.product.update({ where: { id }, data: { active: false } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json(
+      {
+        error:
+          "No se puede eliminar: este producto tiene pedidos asociados. Dejalo inactivo en su lugar.",
+      },
+      { status: 409 }
+    );
+  }
 }

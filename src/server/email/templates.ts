@@ -65,6 +65,71 @@ export function ownerNotificationEmail(data: {
   </div>`;
 }
 
+function formatARS(value: number) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+export function orderConfirmationEmail(data: {
+  customerName: string;
+  orderId: string;
+  items: { title: string; quantity: number; size: string | null; price: number }[];
+  shippingCost: number;
+  total: number;
+}) {
+  const itemsHtml = data.items
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:6px 0; color:#2b2a25;">
+            ${item.title}${item.size ? ` (talla ${item.size})` : ""} × ${item.quantity}
+          </td>
+          <td style="padding:6px 0; text-align:right; color:#2b2a25; white-space:nowrap;">
+            ${formatARS(item.price * item.quantity)}
+          </td>
+        </tr>`
+    )
+    .join("");
+
+  return `
+  <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf6ee; padding:32px;">
+    <div style="max-width:520px; margin:0 auto; background:#ffffff; border-radius:24px; overflow:hidden; border:1px solid #d3e0c3;">
+      <div style="background:#26402f; padding:28px 32px;">
+        <p style="margin:0; color:#faf6ee; font-size:20px; font-style:italic;">Marieta Mascotas</p>
+      </div>
+      <div style="padding:32px; color:#2b2a25;">
+        <h1 style="font-size:20px; margin:0 0 16px;">¡Gracias por tu compra, ${data.customerName}!</h1>
+        <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
+          Recibimos tu pago correctamente. En breve te vamos a contactar por WhatsApp con más
+          detalles sobre el envío de tu pedido.
+        </p>
+        <p style="font-size:12px; color:#7a7a72; margin-top:20px;">Pedido #${data.orderId.slice(-8)}</p>
+        <table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:14px;">
+          ${itemsHtml}
+          <tr>
+            <td style="padding:10px 0 0; border-top:1px solid #e2e2da; color:#4a4a44;">Envío</td>
+            <td style="padding:10px 0 0; border-top:1px solid #e2e2da; text-align:right; color:#4a4a44;">
+              ${data.shippingCost === 0 ? "Gratis" : formatARS(data.shippingCost)}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 0; font-weight:bold; color:#26402f;">Total</td>
+            <td style="padding:6px 0; text-align:right; font-weight:bold; color:#26402f;">
+              ${formatARS(data.total)}
+            </td>
+          </tr>
+        </table>
+        <p style="font-size:14px; line-height:1.6; color:#4a4a44; margin-top:24px;">
+          ¡Gracias por elegirnos! 🐾
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function customOrderConfirmationEmail(ownerName: string, petName: string) {
   return `
   <div style="font-family: Georgia, 'Times New Roman', serif; background:#faf6ee; padding:32px;">

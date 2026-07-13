@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, ChevronRight, ExternalLink, MessageCircle, PawPrint } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, MessageCircle, PawPrint, Trash2 } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { AdminOrderRow } from "@/server/services/orders";
 
@@ -47,6 +47,24 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
       });
       if (res.ok) {
         setRows((prev) => prev.map((row) => (row.id === id ? { ...row, status } : row)));
+      }
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function deleteOrder(id: string) {
+    const confirmed = window.confirm(
+      "Esto borra el pedido de forma DEFINITIVA, no se puede deshacer. ¿Confirmás?"
+    );
+    if (!confirmed) return;
+    setUpdatingId(id);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setRows((prev) => prev.filter((row) => row.id !== id));
+      } else {
+        alert("No se pudo eliminar el pedido.");
       }
     } finally {
       setUpdatingId(null);
@@ -129,6 +147,7 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
               <th className="px-3 py-3">Pago</th>
               <th className="px-3 py-3">WhatsApp</th>
               <th className="px-3 py-3">Estado</th>
+              <th className="px-3 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -210,10 +229,21 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
                         ))}
                       </select>
                     </td>
+                    <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => deleteOrder(order.id)}
+                        disabled={updatingId === order.id}
+                        className="text-ink/40 hover:text-red-600"
+                        aria-label="Eliminar pedido definitivamente"
+                        title="Eliminar pedido definitivamente"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                   {isExpanded && (
                     <tr className="border-b border-sage-100 bg-sage-50/40 last:border-0">
-                      <td colSpan={9} className="px-6 py-5">
+                      <td colSpan={10} className="px-6 py-5">
                         <div className="mb-4 flex flex-wrap gap-x-8 gap-y-1 text-xs text-ink/60">
                           <span>
                             <strong className="text-ink/80">DNI:</strong> {order.dni}
