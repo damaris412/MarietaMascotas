@@ -13,7 +13,7 @@ import type { ProductDTO, ProductSize } from "@/types/catalog";
 export function ProductCard({ product }: { product: ProductDTO }) {
   const [size, setSize] = useState<ProductSize | null>(product.sizes[0] ?? null);
   const [added, setAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { showToast } = useToast();
   const outOfStock = product.stock <= 0;
 
@@ -30,6 +30,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
     addItem(product, size, 1);
     setAdded(true);
     showToast("Producto agregado al carrito", "success");
+    openCart();
     setTimeout(() => setAdded(false), 1200);
   }
 
