@@ -1,5 +1,5 @@
 import { prisma } from "@/server/db/prisma";
-import type { ProductDTO } from "@/types/catalog";
+import type { FocalPoint, ProductDTO } from "@/types/catalog";
 import type { Prisma } from "@prisma/client";
 
 export type CatalogFilters = {
@@ -18,6 +18,7 @@ function toDTO(product: {
   price: Prisma.Decimal;
   previousPrice: Prisma.Decimal | null;
   images: string[];
+  imageFocalPoints: Prisma.JsonValue;
   stock: number;
   sizes: string[];
   rating: number;
@@ -30,6 +31,7 @@ function toDTO(product: {
     sizes: product.sizes as ProductDTO["sizes"],
     price: Number(product.price),
     previousPrice: product.previousPrice ? Number(product.previousPrice) : null,
+    imageFocalPoints: (product.imageFocalPoints as Record<string, FocalPoint> | null) ?? {},
   };
 }
 

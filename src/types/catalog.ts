@@ -6,6 +6,8 @@ export type CategoryDTO = {
   slug: string;
 };
 
+export type FocalPoint = { x: number; y: number };
+
 export type ProductDTO = {
   id: string;
   title: string;
@@ -15,6 +17,7 @@ export type ProductDTO = {
   price: number;
   previousPrice: number | null;
   images: string[];
+  imageFocalPoints: Record<string, FocalPoint>;
   stock: number;
   sizes: ProductSize[];
   rating: number;

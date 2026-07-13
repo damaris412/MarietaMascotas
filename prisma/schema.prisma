@@ -112,6 +112,7 @@ model Product {
   price         Decimal  @db.Decimal(10, 2)
   previousPrice Decimal? @db.Decimal(10, 2)
   images        String[]
+  imageFocalPoints Json?
   stock         Int      @default(0)
   sizes         Size[]
   rating        Float    @default(0)

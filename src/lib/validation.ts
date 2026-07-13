@@ -56,6 +56,7 @@ export const productSchema = z.object({
   sizes: z.array(z.enum(["S", "M", "L"])),
   featured: z.boolean().optional(),
   images: z.array(z.string().min(1)).optional(),
+  imageFocalPoints: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
