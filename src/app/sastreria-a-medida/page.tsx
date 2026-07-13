@@ -80,7 +80,7 @@ export default function SastreriaAMedidaPage() {
         </div>
       </div>
 
-      <div className="mx-auto mt-14 max-w-xl">
+      <div className="mt-14">
         <h2 className="font-display text-xl italic text-english-900">Contanos sobre el pedido</h2>
         <p className="mt-2 text-sm text-ink/60">
           Completá tus datos, las medidas y — si querés — fotos de referencia. Te contactamos para
