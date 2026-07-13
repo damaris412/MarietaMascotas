@@ -105,3 +105,16 @@ html.lenis body {
 .toast-pop {
   animation: toast-pop 0.2s ease-out;
 }
+
+@keyframes cta-glow {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(28, 51, 37, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 22px rgba(28, 51, 37, 0.55);
+  }
+}
+
+.cta-glow {
+  animation: cta-glow 1.6s ease-in-out 2;
+}

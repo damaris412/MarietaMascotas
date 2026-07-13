@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Check, Minus, PawPrint, Plus } from "lucide-react";
+import { Check, Minus, PawPrint, Plus, ZoomIn } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { useCart } from "@/components/providers/CartProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { ProductImageLightbox } from "@/components/catalog/ProductImageLightbox";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { ProductDTO, ProductSize } from "@/types/catalog";
 
@@ -14,6 +15,7 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const { addItem, openCart } = useCart();
   const { showToast } = useToast();
   const outOfStock = product.stock <= 0;
@@ -39,7 +41,12 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-2 md:px-8">
       <div>
-        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-sage-100 to-beige-100">
+        <button
+          type="button"
+          onClick={() => product.images[activeImage] && setLightboxOpen(true)}
+          disabled={!product.images[activeImage]}
+          className="group relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-sage-100 to-beige-100"
+        >
           {product.images[activeImage] ? (
             <Image
               src={product.images[activeImage]}
@@ -58,7 +65,12 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
               {discount}% OFF
             </span>
           )}
-        </div>
+          {product.images[activeImage] && (
+            <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1.5 text-xs font-medium text-linen backdrop-blur-sm transition-colors group-hover:bg-ink/75">
+              <ZoomIn className="h-3.5 w-3.5" /> Ver en grande
+            </span>
+          )}
+        </button>
         {product.images.length > 1 && (
           <div className="mt-3 flex gap-2">
             {product.images.map((image, index) => (
@@ -168,6 +180,16 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
           {product.stock > 0 ? `${product.stock} unidades disponibles` : "Agotado temporalmente"}
         </p>
       </div>
+
+      {lightboxOpen && product.images.length > 0 && (
+        <ProductImageLightbox
+          images={product.images}
+          activeIndex={activeImage}
+          onIndexChange={setActiveImage}
+          onClose={() => setLightboxOpen(false)}
+          alt={product.title}
+        />
+      )}
     </div>
   );
 }
