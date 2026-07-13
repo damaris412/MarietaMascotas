@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
 import { mpPayment } from "@/server/payments/mercadopago";
+import { sendMail } from "@/server/email/mailer";
+import { orderConfirmationEmail } from "@/server/email/templates";
 
 function mapPaymentMethod(paymentTypeId?: string) {
   switch (paymentTypeId) {
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true },
+      include: { items: true, user: { select: { email: true, name: true } } },
     });
     if (!order) return NextResponse.json({ received: true });
 
@@ -116,6 +118,26 @@ export async function POST(req: NextRequest) {
           })
         ),
       ]);
+
+      const customerEmail = order.guestEmail ?? order.user?.email;
+      if (customerEmail) {
+        await sendMail({
+          to: customerEmail,
+          subject: "¡Tu compra fue confirmada! — Marieta Mascotas",
+          html: orderConfirmationEmail({
+            customerName: order.guestName ?? order.user?.name ?? "Cliente",
+            orderId: order.id,
+            items: order.items.map((item) => ({
+              title: item.title,
+              quantity: item.quantity,
+              size: item.size,
+              price: Number(item.price),
+            })),
+            shippingCost: Number(order.shippingCost),
+            total: Number(order.total),
+          }),
+        });
+      }
     } else if (nextStatus !== order.status) {
       await prisma.order.update({
         where: { id: order.id },

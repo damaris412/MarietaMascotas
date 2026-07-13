@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Pencil, Trash2, PawPrint, RotateCcw } from "lucide-react";
+import { Pencil, Trash2, PawPrint, RotateCcw, XCircle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { ProductDTO } from "@/types/catalog";
 
@@ -38,6 +38,25 @@ export function ProductsList({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ active }),
       });
+      router.refresh();
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  async function deleteProduct(id: string) {
+    const confirmed = window.confirm(
+      "Esto borra el producto de forma DEFINITIVA de la base de datos, no se puede deshacer. ¿Confirmás?"
+    );
+    if (!confirmed) return;
+    setPendingId(id);
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        alert(json?.error ?? "No se pudo eliminar el producto.");
+        return;
+      }
       router.refresh();
     } finally {
       setPendingId(null);
@@ -177,15 +196,26 @@ export function ProductsList({
                         <Trash2 className="h-4 w-4" />
                       </button>
                     ) : (
-                      <button
-                        onClick={() => setActive(product.id, true)}
-                        disabled={pendingId === product.id}
-                        className="flex items-center gap-1 text-xs font-semibold text-english-700 hover:text-english-800"
-                        aria-label="Reactivar producto"
-                        title="Reactivar producto"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" /> Reactivar
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setActive(product.id, true)}
+                          disabled={pendingId === product.id}
+                          className="flex items-center gap-1 text-xs font-semibold text-english-700 hover:text-english-800"
+                          aria-label="Reactivar producto"
+                          title="Reactivar producto"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" /> Reactivar
+                        </button>
+                        <button
+                          onClick={() => deleteProduct(product.id)}
+                          disabled={pendingId === product.id}
+                          className="text-ink/40 hover:text-red-600"
+                          aria-label="Eliminar producto definitivamente"
+                          title="Eliminar producto definitivamente"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>
