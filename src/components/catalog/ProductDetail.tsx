@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, Minus, PawPrint, Plus } from "lucide-react";
 import { StarRating } from "@/components/ui/StarRating";
 import { useCart } from "@/components/providers/CartProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { ProductDTO, ProductSize } from "@/types/catalog";
 
@@ -14,12 +15,14 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+  const { showToast } = useToast();
   const outOfStock = product.stock <= 0;
 
   function handleAdd() {
     if (outOfStock) return;
     addItem(product, size, quantity);
     setAdded(true);
+    showToast("Producto agregado al carrito", "success");
     setTimeout(() => setAdded(false), 1200);
   }
 

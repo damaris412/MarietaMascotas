@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Pencil, Trash2, PawPrint, RotateCcw, XCircle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useToast } from "@/components/providers/ToastProvider";
 import type { ProductDTO } from "@/types/catalog";
 
 type StockFilter = "ALL" | "IN_STOCK" | "OUT_OF_STOCK";
@@ -19,6 +20,7 @@ export function ProductsList({
   onEdit: (product: ProductDTO) => void;
 }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [stockFilter, setStockFilter] = useState<StockFilter>("ALL");
@@ -32,12 +34,14 @@ export function ProductsList({
       if (!confirmed) return;
     }
     setPendingId(id);
+    showToast(active ? "Reactivando producto..." : "Desactivando producto...", "loading");
     try {
       await fetch(`/api/admin/products/${id}/active`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ active }),
       });
+      showToast(active ? "Producto reactivado" : "Producto desactivado", "success");
       router.refresh();
     } finally {
       setPendingId(null);
@@ -50,13 +54,15 @@ export function ProductsList({
     );
     if (!confirmed) return;
     setPendingId(id);
+    showToast("Eliminando producto...", "loading");
     try {
       const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
       const json = await res.json().catch(() => null);
       if (!res.ok) {
-        alert(json?.error ?? "No se pudo eliminar el producto.");
+        showToast(json?.error ?? "No se pudo eliminar el producto.", "error", 3000);
         return;
       }
+      showToast("Producto eliminado definitivamente", "success");
       router.refresh();
     } finally {
       setPendingId(null);

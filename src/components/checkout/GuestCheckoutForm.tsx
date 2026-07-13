@@ -7,10 +7,12 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { Loader2, LogOut } from "lucide-react";
 import { guestDetailsSchema, type GuestDetails, type LocalityValue } from "@/lib/validation";
 import { useCart } from "@/components/providers/CartProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { cn } from "@/lib/utils";
 
 export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null }) {
   const { items } = useCart();
+  const { showToast } = useToast();
   const { data: session, status } = useSession();
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,7 @@ export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null
     }
     setServerError(null);
     setLoading(true);
+    showToast("Validando tu pedido...", "loading");
     try {
       const res = await fetch("/api/checkout/mercado-pago", {
         method: "POST",
@@ -55,8 +58,14 @@ export function GuestCheckoutForm({ locality }: { locality: LocalityValue | null
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "No se pudo procesar el pago.");
+      showToast("¡Pedido validado! Redirigiendo a Mercado Pago...", "success");
       window.location.assign(json.initPoint);
     } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Ocurrió un error inesperado.",
+        "error",
+        3000
+      );
       setServerError(error instanceof Error ? error.message : "Ocurrió un error inesperado.");
       setLoading(false);
     }
