@@ -14,7 +14,7 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { showToast } = useToast();
   const outOfStock = product.stock <= 0;
 
@@ -23,6 +23,7 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
     addItem(product, size, quantity);
     setAdded(true);
     showToast("Producto agregado al carrito", "success");
+    openCart();
     setTimeout(() => setAdded(false), 1200);
   }
 

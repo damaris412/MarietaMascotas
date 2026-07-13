@@ -114,13 +114,21 @@ export function CartDrawer() {
                     {formatCurrency(subtotal)}
                   </span>
                 </div>
-                <Link
-                  href="/checkout"
-                  onClick={closeCart}
-                  className="block w-full rounded-full bg-english-700 py-3.5 text-center text-sm font-semibold text-linen transition-colors hover:bg-english-800"
+                <motion.div
+                  initial={{ scale: 0.92, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 18 }}
+                  className="relative"
                 >
-                  Finalizar compra
-                </Link>
+                  <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-english-700/50" />
+                  <Link
+                    href="/checkout"
+                    onClick={closeCart}
+                    className="relative block w-full rounded-full bg-english-700 py-3.5 text-center text-sm font-semibold text-linen shadow-lg shadow-english-800/30 transition-colors hover:bg-english-800"
+                  >
+                    Finalizar compra
+                  </Link>
+                </motion.div>
               </div>
             )}
           </motion.aside>
