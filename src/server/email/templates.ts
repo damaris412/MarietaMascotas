@@ -1,3 +1,6 @@
+const LOGO_URL = "https://marietamascotas.vercel.app/images/logo/logo-email.png";
+const LOGO_IMG = `<img src="${LOGO_URL}" alt="Marieta Mascotas" width="40" height="40" style="display:block; margin:0 auto 14px; border-radius:50%;" />`;
+
 const AREA_LABELS: Record<string, string> = {
   MARKETING: "Marketing",
   CATALOGO_FOTOS: "Fotos / subida de catálogo",
@@ -21,6 +24,7 @@ export function applicantConfirmationEmail(name: string) {
         <p style="margin:0; color:#faf6ee; font-size:20px; font-style:italic;">Marieta Mascotas</p>
       </div>
       <div style="padding:32px; color:#2b2a25;">
+        ${LOGO_IMG}
         <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${name}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
           Recibimos tu postulación para sumarte a Marieta Mascotas. Muchas gracias por tu interés
@@ -101,6 +105,7 @@ export function orderConfirmationEmail(data: {
         <p style="margin:0; color:#faf6ee; font-size:20px; font-style:italic;">Marieta Mascotas</p>
       </div>
       <div style="padding:32px; color:#2b2a25;">
+        ${LOGO_IMG}
         <h1 style="font-size:20px; margin:0 0 16px;">¡Gracias por tu compra, ${data.customerName}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
           Recibimos tu pago correctamente. En breve te vamos a contactar por WhatsApp con más
@@ -138,6 +143,7 @@ export function customOrderConfirmationEmail(ownerName: string, petName: string)
         <p style="margin:0; color:#faf6ee; font-size:20px; font-style:italic;">Marieta Mascotas</p>
       </div>
       <div style="padding:32px; color:#2b2a25;">
+        ${LOGO_IMG}
         <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${ownerName}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
           Recibimos tu pedido de prenda a medida para ${petName}. Vamos a revisar las medidas y

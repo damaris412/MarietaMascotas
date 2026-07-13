@@ -1,5 +1,6 @@
 import { getStoreSettings } from "@/server/services/settings";
 import { SettingsForm } from "@/components/admin/SettingsForm";
+import { TestEmailButton } from "@/components/admin/TestEmailButton";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function AdminConfiguracionPage() {
         <p className="text-sm text-ink/60">Ajustes generales de la tienda.</p>
       </div>
       <SettingsForm initial={settings} />
+      <TestEmailButton />
     </div>
   );
 }

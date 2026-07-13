@@ -28,6 +28,10 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
       ? Math.round(100 - (product.price / product.previousPrice) * 100)
       : null;
 
+  const activeUrl = product.images[activeImage];
+  const focalPoint = activeUrl ? product.imageFocalPoints?.[activeUrl] : null;
+  const objectPosition = focalPoint ? `${focalPoint.x}% ${focalPoint.y}%` : undefined;
+
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 md:grid-cols-2 md:px-8">
       <div>
@@ -38,6 +42,7 @@ export function ProductDetail({ product }: { product: ProductDTO }) {
               alt={product.title}
               fill
               sizes="(min-width: 768px) 50vw, 100vw"
+              style={objectPosition ? { objectPosition } : undefined}
               className="object-cover"
               priority
             />
