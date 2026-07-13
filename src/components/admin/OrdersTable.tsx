@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronDown, ChevronRight, ExternalLink, MessageCircle, PawPrint, Trash2 } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
+import { useToast } from "@/components/providers/ToastProvider";
 import type { AdminOrderRow } from "@/server/services/orders";
 
 const STATUS_OPTIONS = ["PENDING", "PAID", "SHIPPED", "CANCELLED"] as const;
@@ -30,6 +31,7 @@ const LOCALITY_LABELS: Record<string, string> = {
 };
 
 export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
+  const { showToast } = useToast();
   const [rows, setRows] = useState(orders);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -39,6 +41,7 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
 
   async function updateStatus(id: string, status: (typeof STATUS_OPTIONS)[number]) {
     setUpdatingId(id);
+    showToast("Actualizando estado del envío...", "loading");
     try {
       const res = await fetch(`/api/admin/orders/${id}/status`, {
         method: "PATCH",
@@ -47,6 +50,9 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
       });
       if (res.ok) {
         setRows((prev) => prev.map((row) => (row.id === id ? { ...row, status } : row)));
+        showToast(`Pedido marcado como "${STATUS_LABELS[status]}"`, "success");
+      } else {
+        showToast("No se pudo actualizar el estado.", "error", 3000);
       }
     } finally {
       setUpdatingId(null);
@@ -59,12 +65,14 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
     );
     if (!confirmed) return;
     setUpdatingId(id);
+    showToast("Eliminando pedido...", "loading");
     try {
       const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
       if (res.ok) {
         setRows((prev) => prev.filter((row) => row.id !== id));
+        showToast("Pedido eliminado definitivamente", "success");
       } else {
-        alert("No se pudo eliminar el pedido.");
+        showToast("No se pudo eliminar el pedido.", "error", 3000);
       }
     } finally {
       setUpdatingId(null);
@@ -75,6 +83,7 @@ export function OrdersTable({ orders }: { orders: AdminOrderRow[] }) {
     setRows((prev) =>
       prev.map((row) => (row.id === id ? { ...row, whatsappContacted: !current } : row))
     );
+    showToast(current ? "Marcado como no contactado" : "Marcado como contactado", "success");
     await fetch(`/api/admin/orders/${id}/whatsapp`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

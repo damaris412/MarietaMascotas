@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Ruler } from "lucide-react";
 
-export function HeroCTAs({ featuredImage }: { featuredImage: string | null }) {
+export function HeroCTAs() {
   return (
     <div className="w-full max-w-3xl px-6">
       <h2 className="mb-6 text-balance text-center font-display text-2xl italic text-linen drop-shadow-md sm:text-3xl">
@@ -11,18 +10,8 @@ export function HeroCTAs({ featuredImage }: { featuredImage: string | null }) {
       <div className="grid gap-4 sm:grid-cols-[1.3fr_1fr]">
         <Link
           href="/catalogo"
-          className="group relative flex min-h-[190px] flex-col justify-end overflow-hidden rounded-2xl bg-english-900 p-6 shadow-xl"
+          className="group relative flex min-h-[190px] flex-col justify-end overflow-hidden rounded-2xl bg-english-900 p-6 shadow-xl transition-colors hover:bg-english-800"
         >
-          {featuredImage && (
-            <Image
-              src={featuredImage}
-              alt=""
-              fill
-              sizes="(min-width: 640px) 40vw, 90vw"
-              className="object-cover opacity-60 transition-transform duration-500 group-hover:scale-105"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-english-900 via-english-900/60 to-transparent" />
           <div className="relative z-10">
             <span className="mb-2 inline-block rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-linen backdrop-blur-sm">
               Catálogo

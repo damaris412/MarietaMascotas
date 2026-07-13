@@ -6,7 +6,7 @@ import { MobileHero } from "@/components/home/MobileHero";
 
 const MOBILE_QUERY = "(max-width: 767px)";
 
-export function Hero({ featuredImage }: { featuredImage: string | null }) {
+export function Hero() {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -22,9 +22,5 @@ export function Hero({ featuredImage }: { featuredImage: string | null }) {
     return <div className="h-[100dvh] w-full bg-english-900" />;
   }
 
-  return isMobile ? (
-    <MobileHero featuredImage={featuredImage} />
-  ) : (
-    <DesktopHero featuredImage={featuredImage} />
-  );
+  return isMobile ? <MobileHero /> : <DesktopHero />;
 }

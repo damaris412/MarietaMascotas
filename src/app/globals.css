@@ -90,3 +90,18 @@ html.lenis body {
 .text-balance {
   text-wrap: balance;
 }
+
+@keyframes toast-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-pop {
+  animation: toast-pop 0.2s ease-out;
+}

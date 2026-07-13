@@ -2,6 +2,7 @@
 
 import { MapPin, MessageCircle } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { LocalityValue } from "@/lib/validation";
 
@@ -41,11 +42,22 @@ export function DeliveryAreaGate({
   children: React.ReactNode;
 }) {
   const { items, subtotal } = useCart();
+  const { showToast } = useToast();
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   const whatsappHref = whatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(buildWhatsAppMessage(items, subtotal))}`
     : undefined;
+
+  function handleSelect(option: LocalityValue) {
+    onLocalityChange(option);
+    if (option === "VILLA_MARIA" || option === "VILLA_NUEVA") {
+      showToast("Validando zona de envío...", "loading", 700);
+      window.setTimeout(() => {
+        showToast("¡Hacemos envíos a tu zona!", "success");
+      }, 700);
+    }
+  }
 
   return (
     <div className="mb-8">
@@ -64,7 +76,7 @@ export function DeliveryAreaGate({
           {OPTIONS.map((option) => (
             <button
               key={option.value}
-              onClick={() => onLocalityChange(option.value)}
+              onClick={() => handleSelect(option.value)}
               className={cn(
                 "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
                 locality === option.value

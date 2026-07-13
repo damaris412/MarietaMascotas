@@ -67,7 +67,7 @@ function ChapterText({
   );
 }
 
-export function DesktopHero({ featuredImage }: { featuredImage: string | null }) {
+export function DesktopHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ctaVisible, setCtaVisible] = useState(false);
@@ -140,7 +140,7 @@ export function DesktopHero({ featuredImage }: { featuredImage: string | null })
             ctaVisible ? "pointer-events-auto" : "pointer-events-none"
           )}
         >
-          <HeroCTAs featuredImage={featuredImage} />
+          <HeroCTAs />
         </motion.div>
 
         {hintVisible && (

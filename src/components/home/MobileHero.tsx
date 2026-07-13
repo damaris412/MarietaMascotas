@@ -6,7 +6,7 @@ import { HeroCTAs } from "@/components/home/HeroCTAs";
 
 const VIDEO_SRC = "/video/hero-marieta-mascotas.mp4";
 
-export function MobileHero({ featuredImage }: { featuredImage: string | null }) {
+export function MobileHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const ctaSectionRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
@@ -61,7 +61,7 @@ export function MobileHero({ featuredImage }: { featuredImage: string | null }) 
       </section>
 
       <div ref={ctaSectionRef} className="flex justify-center bg-english-900 py-14">
-        <HeroCTAs featuredImage={featuredImage} />
+        <HeroCTAs />
       </div>
     </>
   );
