@@ -6,8 +6,14 @@ import {
   customOrderConfirmationEmail,
   customOrderNotificationEmail,
 } from "@/server/email/templates";
+import { checkRateLimit, getClientIp, RATE_LIMIT_MESSAGE } from "@/server/utils/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const allowed = await checkRateLimit(`custom-order:${getClientIp(req)}`, 5);
+  if (!allowed) {
+    return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+  }
+
   const json = await req.json();
   const parsed = customOrderSchema.safeParse(json);
   if (!parsed.success) {
