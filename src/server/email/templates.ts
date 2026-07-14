@@ -1,6 +1,19 @@
 const LOGO_URL = "https://marietamascotas.vercel.app/images/logo/logo-email.png";
 const LOGO_IMG = `<img src="${LOGO_URL}" alt="Marieta Mascotas" width="40" height="40" style="display:block; margin:0 auto 14px; border-radius:50%;" />`;
 
+// Todo texto que venga de un formulario público (nombre, mensaje, notas, etc.)
+// pasa por acá antes de insertarse en el HTML del email — sin esto, alguien
+// podría escribir HTML/links falsos en un campo de texto y que se rendericen
+// como si fueran parte real del correo que recibe la dueña del negocio.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const AREA_LABELS: Record<string, string> = {
   MARKETING: "Marketing",
   CATALOGO_FOTOS: "Fotos / subida de catálogo",
@@ -25,7 +38,7 @@ export function applicantConfirmationEmail(name: string) {
       </div>
       <div style="padding:32px; color:#2b2a25;">
         ${LOGO_IMG}
-        <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${name}!</h1>
+        <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${escapeHtml(name)}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
           Recibimos tu postulación para sumarte a Marieta Mascotas. Muchas gracias por tu interés
           en formar parte del equipo.
@@ -57,13 +70,13 @@ export function ownerNotificationEmail(data: {
         <p style="margin:0; color:#faf6ee; font-size:18px; font-style:italic;">Nueva postulación</p>
       </div>
       <div style="padding:28px 32px; color:#2b2a25; font-size:14px; line-height:1.7;">
-        <p><strong>Nombre:</strong> ${data.name}</p>
-        <p><strong>Correo:</strong> ${data.email}</p>
-        <p><strong>Teléfono:</strong> ${data.phone}</p>
-        <p><strong>Área:</strong> ${areaLabel(data.area)}</p>
-        ${data.resumeUrl ? `<p><strong>CV / propuesta:</strong> <a href="${data.resumeUrl}">${data.resumeUrl}</a></p>` : ""}
+        <p><strong>Nombre:</strong> ${escapeHtml(data.name)}</p>
+        <p><strong>Correo:</strong> ${escapeHtml(data.email)}</p>
+        <p><strong>Teléfono:</strong> ${escapeHtml(data.phone)}</p>
+        <p><strong>Área:</strong> ${escapeHtml(areaLabel(data.area))}</p>
+        ${data.resumeUrl ? `<p><strong>CV / propuesta:</strong> <a href="${escapeHtml(data.resumeUrl)}">${escapeHtml(data.resumeUrl)}</a></p>` : ""}
         <p><strong>Mensaje:</strong></p>
-        <p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${data.message}</p>
+        <p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${escapeHtml(data.message)}</p>
       </div>
     </div>
   </div>`;
@@ -89,7 +102,7 @@ export function orderConfirmationEmail(data: {
       (item) => `
         <tr>
           <td style="padding:6px 0; color:#2b2a25;">
-            ${item.title}${item.size ? ` (talla ${item.size})` : ""} × ${item.quantity}
+            ${escapeHtml(item.title)}${item.size ? ` (talla ${escapeHtml(item.size)})` : ""} × ${item.quantity}
           </td>
           <td style="padding:6px 0; text-align:right; color:#2b2a25; white-space:nowrap;">
             ${formatARS(item.price * item.quantity)}
@@ -106,7 +119,7 @@ export function orderConfirmationEmail(data: {
       </div>
       <div style="padding:32px; color:#2b2a25;">
         ${LOGO_IMG}
-        <h1 style="font-size:20px; margin:0 0 16px;">¡Gracias por tu compra, ${data.customerName}!</h1>
+        <h1 style="font-size:20px; margin:0 0 16px;">¡Gracias por tu compra, ${escapeHtml(data.customerName)}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
           Recibimos tu pago correctamente. En breve te vamos a contactar por WhatsApp con más
           detalles sobre el envío de tu pedido.
@@ -144,9 +157,9 @@ export function customOrderConfirmationEmail(ownerName: string, petName: string)
       </div>
       <div style="padding:32px; color:#2b2a25;">
         ${LOGO_IMG}
-        <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${ownerName}!</h1>
+        <h1 style="font-size:20px; margin:0 0 16px;">¡Hola, ${escapeHtml(ownerName)}!</h1>
         <p style="font-size:14px; line-height:1.6; color:#4a4a44;">
-          Recibimos tu pedido de prenda a medida para ${petName}. Vamos a revisar las medidas y
+          Recibimos tu pedido de prenda a medida para ${escapeHtml(petName)}. Vamos a revisar las medidas y
           las referencias que nos enviaste, y te vamos a contactar a la brevedad para avanzar con
           el diseño.
         </p>
@@ -175,7 +188,9 @@ export function customOrderNotificationEmail(data: {
 }) {
   const mediaLinks = (urls: string[]) =>
     urls.length
-      ? urls.map((url, i) => `<a href="${url}" style="display:block;">Archivo ${i + 1}</a>`).join("")
+      ? urls
+          .map((url, i) => `<a href="${escapeHtml(url)}" style="display:block;">Archivo ${i + 1}</a>`)
+          .join("")
       : "<span>—</span>";
 
   return `
@@ -185,13 +200,13 @@ export function customOrderNotificationEmail(data: {
         <p style="margin:0; color:#faf6ee; font-size:18px; font-style:italic;">Nuevo pedido de sastrería a medida</p>
       </div>
       <div style="padding:28px 32px; color:#2b2a25; font-size:14px; line-height:1.7;">
-        <p><strong>Dueño:</strong> ${data.ownerName}</p>
-        <p><strong>Correo:</strong> ${data.ownerEmail}</p>
-        <p><strong>Teléfono:</strong> ${data.ownerPhone}</p>
-        <p><strong>Mascota:</strong> ${data.petName} — ${data.petBreed}, ${data.petAge}</p>
+        <p><strong>Dueño:</strong> ${escapeHtml(data.ownerName)}</p>
+        <p><strong>Correo:</strong> ${escapeHtml(data.ownerEmail)}</p>
+        <p><strong>Teléfono:</strong> ${escapeHtml(data.ownerPhone)}</p>
+        <p><strong>Mascota:</strong> ${escapeHtml(data.petName)} — ${escapeHtml(data.petBreed)}, ${escapeHtml(data.petAge)}</p>
         <p><strong>Medidas:</strong> cuello ${data.neckCm}cm · tórax ${data.chestCm}cm · lomo ${data.backLengthCm}cm</p>
-        ${data.eventName ? `<p><strong>Evento:</strong> ${data.eventName}</p>` : ""}
-        ${data.notes ? `<p><strong>Comentarios:</strong></p><p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${data.notes}</p>` : ""}
+        ${data.eventName ? `<p><strong>Evento:</strong> ${escapeHtml(data.eventName)}</p>` : ""}
+        ${data.notes ? `<p><strong>Comentarios:</strong></p><p style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${escapeHtml(data.notes)}</p>` : ""}
         <p><strong>Referencias de tela:</strong></p>
         <div style="background:#f4f7ef; border-radius:12px; padding:12px 16px;">${mediaLinks(data.fabricMediaUrls)}</div>
         <p style="margin-top:12px;"><strong>Fotos/videos de la mascota:</strong></p>
