@@ -3,8 +3,14 @@ import { prisma } from "@/server/db/prisma";
 import { jobApplicationSchema } from "@/lib/validation";
 import { sendMail } from "@/server/email/mailer";
 import { applicantConfirmationEmail, ownerNotificationEmail } from "@/server/email/templates";
+import { checkRateLimit, getClientIp, RATE_LIMIT_MESSAGE } from "@/server/utils/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const allowed = await checkRateLimit(`job-application:${getClientIp(req)}`, 5);
+  if (!allowed) {
+    return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+  }
+
   const json = await req.json();
   const parsed = jobApplicationSchema.safeParse(json);
   if (!parsed.success) {

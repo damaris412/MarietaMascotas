@@ -5,9 +5,15 @@ import { createCheckoutPreference } from "@/server/payments/mercadopago";
 import { checkoutRequestSchema } from "@/lib/validation";
 import { calculateShippingCost } from "@/lib/shipping";
 import { getStoreSettings } from "@/server/services/settings";
+import { checkRateLimit, getClientIp, RATE_LIMIT_MESSAGE } from "@/server/utils/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
+    const allowed = await checkRateLimit(`checkout:${getClientIp(req)}`, 10);
+    if (!allowed) {
+      return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+    }
+
     const session = await auth();
     const json = await req.json();
     const parsed = checkoutRequestSchema.safeParse(json);

@@ -223,6 +223,17 @@ model CustomOrderRequest {
   @@index([createdAt])
 }
 
+// Contador de pedidos por ventana de tiempo para limitar abuso en rutas
+// públicas (subida de archivos, formularios, checkout). Cada fila es un
+// "bucket" tipo `clave:ventana-de-tiempo`; se limpian solas por expiresAt.
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
