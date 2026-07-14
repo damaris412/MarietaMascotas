@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { checkRateLimit, getClientIp, RATE_LIMIT_MESSAGE } from "@/server/utils/rateLimit";
 
 export async function POST(request: Request): Promise<NextResponse> {
+  const allowed = await checkRateLimit(`upload:trabaja-con-nosotros:${getClientIp(request)}`, 20);
+  if (!allowed) {
+    return NextResponse.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 });
+  }
+
   const body = (await request.json()) as HandleUploadBody;
 
   try {
